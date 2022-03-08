@@ -1,15 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:backdrop/backdrop.dart';
-import 'utils.dart';
+import '../utils.dart';
 import 'package:shimmer/shimmer.dart';
+import 'articolo.dart';
 
 WidgetOptions wardrobeOptions = WidgetOptions(
-    BackdropAppBar(title: Text("Wardrobe"), backgroundColor: Colors.transparent,),
+    BackdropAppBar(
+      title: Text("Wardrobe",),
+      automaticallyImplyLeading: false,
+      actions: <Widget>[
+        BackdropToggleButton(
+          icon: AnimatedIcons.list_view,
+        )
+      ],
+    ),
     WardrobeFrontLayer(),
     ListTile(title: Text("Titolo Test"),),
-    BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10)),
-    BackdropSubHeader( title: Text("Title") )
+    BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+    BackdropSubHeader( title: Text("Title") ),
+    MyFAB(
+      onPressed: (){},
+      icon: Icon(Icons.add),
+    ),
 );
 
 class WardrobeFrontLayer extends StatefulWidget{
@@ -20,12 +33,10 @@ class WardrobeFrontLayer extends StatefulWidget{
 }
 
 class WardrobeFrontLayerState extends State<WardrobeFrontLayer> {
-  Widget buildCardShimmer() =>
-      Shimmer.fromColors(child: Card(),
-          baseColor: Colors.blueAccent,
-          highlightColor: Colors.cyanAccent);
+  Widget buildCardShimmer() => Shimmer.fromColors(child: Card(), baseColor: Color(0xFFC4C3C3), highlightColor: Color(0xFFEFEFEF));
 
   Widget buildCard(CardItem card) => card;
+
   List<CardItem> items = [];
   bool isLoading = false;
 
@@ -36,11 +47,12 @@ class WardrobeFrontLayerState extends State<WardrobeFrontLayer> {
   }
 
   Future loadData() async {
-    setState(() => isLoading = true);
+    setState( () => isLoading = true );
 
     await Future.delayed(Duration(seconds: 2), () {});
     items = List.of(allItems);
-    setState(() => isLoading = false);
+
+    if(mounted)setState( () => isLoading = false );
   }
 
   @override
@@ -56,7 +68,10 @@ class WardrobeFrontLayerState extends State<WardrobeFrontLayer> {
         if (isLoading) {
           return buildCardShimmer();
         } else {
-          return Card();
+          return InkWell(
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context){ return Articolo(); } )),
+            child: Card(),
+          );
         }
       },
       itemCount: isLoading ? 8 : items.length,

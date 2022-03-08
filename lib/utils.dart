@@ -1,6 +1,11 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:backdrop/backdrop.dart';
+import 'screens/profile.dart';
+import 'package:image_picker/image_picker.dart';
+import 'screens/articolo.dart';
 
 class CardExtended extends StatelessWidget{
   const CardExtended({Key? key}) : super(key: key);
@@ -54,7 +59,7 @@ class CardItem extends StatelessWidget{
 
 }
 
-List<CardItem> allItems = [CardItem()];
+List<CardItem> allItems = [CardItem(),CardItem(),CardItem(),CardItem(),CardItem()];
 
 class WidgetOptions{
   PreferredSizeWidget _appBar = AppBar();
@@ -62,13 +67,15 @@ class WidgetOptions{
   Widget _backLayer = Container();
   BorderRadius _frontLayerBorderRadius = BorderRadius.circular(0);
   Widget _subheader = BackdropSubHeader(title: Text(""),);
+  Widget _floatingActionButton = FloatingActionButton(onPressed: (){});
 
-  WidgetOptions(appBar, frontLayer, backLayer, frontLayerBorderRadius, subheader){
+  WidgetOptions(appBar, frontLayer, backLayer, frontLayerBorderRadius, subheader, floatingActionButton){
     _appBar = appBar;
     _frontLayer = frontLayer;
     _backLayer = backLayer;
     _frontLayerBorderRadius = frontLayerBorderRadius;
     _subheader = subheader;
+    _floatingActionButton = floatingActionButton;
   }
 
   PreferredSizeWidget getAppBar(){ return _appBar; }
@@ -76,5 +83,52 @@ class WidgetOptions{
   Widget getBackLayer(){ return _backLayer; }
   BorderRadius getFrontLayerBorderRadius(){ return _frontLayerBorderRadius; }
   Widget getSubheader(){ return _subheader; }
+  Widget getFloatingActionButton(){ return _floatingActionButton; }
 }
 
+
+
+class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final String screenTitle;
+  final List<Widget> actionList ;
+
+  MyAppBar({required this.screenTitle, this.actionList = const[] });
+
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(
+        title: Text(screenTitle),
+        elevation: 0,
+        actions: actionList
+    );
+  }
+
+  @override
+  Size get preferredSize => Size.fromHeight(kToolbarHeight);
+}
+
+
+
+class MyFAB extends StatelessWidget {
+  final VoidCallback? onPressed;
+  final Icon? icon;
+
+  Widget standard(BuildContext context){
+    return NuovoArticolo();
+  }
+
+  MyFAB({
+    required this.onPressed,
+    required this.icon
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return FloatingActionButton(
+        onPressed: (){
+          Navigator.push(context, MaterialPageRoute(builder: (context){ return standard(context); } ));
+        },
+        child: icon,
+    );
+  }
+}

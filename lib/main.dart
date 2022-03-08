@@ -1,14 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:backdrop/backdrop.dart';
-import 'explore.dart';
-import 'profile.dart';
-import 'myOutfits.dart';
-import 'wardrobe.dart';
-import 'wishlist.dart';
+import 'screens/explore.dart';
+import 'screens/profile.dart';
+import 'screens/my_outfits.dart';
+import 'screens/wardrobe.dart';
+import 'screens/wishlist.dart';
 import 'utils.dart';
+import 'package:camera/camera.dart';
 
-void main() => runApp(const MyApp());
+List<CameraDescription> cameras = [];
+
+//TO-DO: Cambiare versione minima sdk
+
+Future<void> main() async{
+  try {
+    WidgetsFlutterBinding.ensureInitialized();
+    cameras = await availableCameras();
+  } on CameraException catch (e) {
+    print('Error in fetching the cameras: $e');
+  }
+
+  runApp(const MyApp());
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -17,24 +31,25 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Builder(
-        builder: (BuildContext context){
-          return BaseRoute();
-        },
-      ),
       theme: ThemeData(
         // Define the default brightness and colors.
         brightness: Brightness.light,
-        primaryColor: Colors.green,
+        primaryColor: Colors.orange,
+        backgroundColor: Colors.orange,
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.orange
+        ),
 
-        fontFamily: 'Georgia',
+        fontFamily: 'Montserrat',
 
         textTheme: const TextTheme(
-          headline1: TextStyle(fontSize: 72.0, fontWeight: FontWeight.bold),
-          headline6: TextStyle(fontSize: 36.0, fontStyle: FontStyle.italic),
+
+          headline1: TextStyle(fontSize: 48.0, fontWeight: FontWeight.bold, color: Colors.pink),
+          headline6: TextStyle(fontSize: 26.0, fontWeight: FontWeight.w700),
           bodyText2: TextStyle(fontSize: 14.0, fontFamily: 'Hind'),
         ),
       ),
+      home: BaseRoute(),
     );
   }
 }
@@ -53,6 +68,7 @@ class _BaseRouteState extends State<BaseRoute> {
   Widget _backLayer = _widgetOptions.elementAt(0).getBackLayer();
   BorderRadius _frontLayerBorderRadius = _widgetOptions.elementAt(0).getFrontLayerBorderRadius();
   Widget _subheader = _widgetOptions.elementAt(0).getSubheader();
+  Widget _floatingActionButton = _widgetOptions.elementAt(0).getFloatingActionButton();
 
   static List<WidgetOptions> _widgetOptions = <WidgetOptions>[
     wardrobeOptions,
@@ -71,53 +87,57 @@ class _BaseRouteState extends State<BaseRoute> {
       _subheader = _widgetOptions.elementAt(index).getSubheader();
       _backLayer = _widgetOptions.elementAt(index).getBackLayer();
       _frontLayerBorderRadius = _widgetOptions.elementAt(index).getFrontLayerBorderRadius();
+      _floatingActionButton = _widgetOptions.elementAt(index).getFloatingActionButton();
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return BackdropScaffold(
-      backgroundColor: Theme.of(context).colorScheme.primary,
-      frontLayerBackgroundColor: Theme.of(context).colorScheme.primary,
+      backLayerBackgroundColor: Theme.of(context).backgroundColor,
+      frontLayerBackgroundColor: Colors.pink,
       frontLayerBorderRadius: _frontLayerBorderRadius,
       subHeader: _subheader,
       appBar: _appBar,
       frontLayer: _frontLayer,
       backLayer: _backLayer,
-      bottomNavigationBar: Builder(builder: (BuildContext context){
-        return BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          unselectedItemColor: Colors.black,
-          selectedItemColor: Colors.blueAccent,
-          onTap: (index) {
-            Backdrop.of(context).concealBackLayer();
-            _onItemTapped(index);
-          },
-          currentIndex: _selectedIndex,
-          items: <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: "Home",
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.architecture),
-              label: "Outfits",
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.explore),
-              label: "Explore",
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.favorite),
-              label: "Wishlist",
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person),
-              label: "Profile",
-            ),
-          ],
-        );
-      })
+      floatingActionButton: _floatingActionButton,
+      bottomNavigationBar: Builder(
+        builder: (BuildContext context){
+          return BottomNavigationBar(
+            backgroundColor: Colors.orange,
+            selectedItemColor: Colors.blue,
+            type: BottomNavigationBarType.fixed,
+            onTap: (index) {
+              Backdrop.of(context).concealBackLayer();
+              _onItemTapped(index);
+            },
+            currentIndex: _selectedIndex,
+            items: <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.home),
+                label: "Wardrobe",
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.architecture),
+                label: "MyOutfits",
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.explore),
+                label: "Explore",
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.favorite),
+                label: "Wishlist",
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.person),
+                label: "Profile",
+              ),
+            ],
+          );
+        },
+      )
     );
   }
 }

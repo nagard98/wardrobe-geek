@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:backdrop/backdrop.dart';
-import 'utils.dart';
+import '../utils.dart';
 import 'package:shimmer/shimmer.dart';
 
 WidgetOptions wishlistOptions = WidgetOptions(
-    BackdropAppBar(title: Text("MyOutfits"), automaticallyImplyLeading: false,),
+    BackdropAppBar(title: Text("Wishlist"), automaticallyImplyLeading: false,),
     WishlistFrontLayer(),
     Container(),
-    BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10)),
-    BackdropSubHeader( title: Text("Title") )
+    BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+    BackdropSubHeader( title: Text("Title") ),
+    SizedBox.shrink()
 );
 
 class WishlistFrontLayer extends StatefulWidget{
@@ -20,10 +21,7 @@ class WishlistFrontLayer extends StatefulWidget{
 }
 
 class WishlistFrontLayerState extends State<WishlistFrontLayer> {
-  Widget buildCardShimmer() =>
-      Shimmer.fromColors(child: Card(),
-          baseColor: Colors.blueAccent,
-          highlightColor: Colors.cyanAccent);
+  Widget buildCardShimmer() => Shimmer.fromColors(child: Card(), baseColor: Color(0xFFC4C3C3), highlightColor: Color(0xFFEFEFEF));
 
   Widget buildCard(CardItem card) => card;
   List<CardItem> items = [];
@@ -40,7 +38,7 @@ class WishlistFrontLayerState extends State<WishlistFrontLayer> {
 
     await Future.delayed(Duration(seconds: 2), () {});
     items = List.of(allItems);
-    setState(() => isLoading = false);
+    if(mounted) setState(() => isLoading = false);
   }
 
   @override

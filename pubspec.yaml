@@ -47,12 +47,24 @@ dev_dependencies:
   flutter_lints: ^1.0.0
   backdrop: ^0.7.1
   shimmer: ^2.0.0
+  camera: ^0.9.4+14
+  image_picker: ^0.8.4+10
+  sleek_circular_slider: ^2.0.1
+  flutter_colorpicker: ^1.0.3
+  path_provider: ^2.0.9
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter.
 flutter:
+  fonts:
+    - family: Montserrat
+      fonts:
+        - asset: fonts/Montserrat/static/Montserrat-Bold.ttf
+        - asset: fonts/Montserrat/static/Montserrat-Medium.ttf
+        - asset: fonts/Montserrat/static/Montserrat-Light.ttf
+        - asset: fonts/Montserrat/static/Montserrat-Regular.ttf
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
