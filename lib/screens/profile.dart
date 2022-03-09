@@ -1,31 +1,42 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:backdrop/backdrop.dart';
 import '../utils.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:developer';
 import 'package:sleek_circular_slider/sleek_circular_slider.dart';
 
-WidgetOptions profileOptions = WidgetOptions(
-    MyAppBar(
-      screenTitle: "Guardaroba",
-      actionList: [
-        IconButton(
-            onPressed: () => {},
-            icon: Icon(Icons.settings)
-        ),
-        IconButton(
-          onPressed: () => ProfileFrontLayer.pickImage() ,
-          icon: Icon(Icons.photo_camera)
-        )
+/*
+
+class Profile extends StatelessWidget{
+  @override
+  Widget build(BuildContext context) {
+    return ProfileFrontLayer();
+  }
+
+}
+*/
+
+
+class ProfileAppBar extends BackdropAppBar{
+  @override
+  Widget build(BuildContext context) {
+    return BackdropAppBar(
+      actions: [
+        IconButton(onPressed: (){}, icon: Icon(Icons.settings))
       ],
-    ),
-    ProfileFrontLayer(),
-    Container(),
-    BorderRadius.zero,
-    Container(),
-    SizedBox.shrink()
-);
+      automaticallyImplyLeading: false,
+      title: Text('Profile',),
+    );
+  }
+
+}
+
+class ProfileBackLayer extends StatelessWidget{
+  @override
+  Widget build(BuildContext context) {
+    return Container();
+  }
+}
 
 class ProfileFrontLayer extends StatelessWidget{
   const ProfileFrontLayer({Key? key}) : super(key: key);
@@ -51,7 +62,7 @@ class ProfileFrontLayer extends StatelessWidget{
                 ),
                 Container(
                   decoration: BoxDecoration(color: Colors.pink , borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))),
-                  height: 40,
+                  height: 60,
                   margin: EdgeInsets.only(top: 160),
                 ),
                 Container(
@@ -134,7 +145,7 @@ class ProfileFrontLayer extends StatelessWidget{
                   Divider(height:30 , color: Colors.pink,),
 
                   Container(
-                    margin: EdgeInsets.only(left: 30),
+                    margin: EdgeInsets.only(left: 20),
                     child: Column(
                       children: [
                         Row(
@@ -183,7 +194,7 @@ class ProfileFrontLayer extends StatelessWidget{
                   Divider(height:30 , color: Colors.pink,),
 
                   Container(
-                    margin: EdgeInsets.only(left: 30),
+                    margin: EdgeInsets.only(left: 20),
                     child: Column(
                       children: [
                         Row(
@@ -253,7 +264,6 @@ class ProfileFrontLayer extends StatelessWidget{
             ],
           ),
         ),
-
       ],
     );
   }

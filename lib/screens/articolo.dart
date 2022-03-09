@@ -6,7 +6,6 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:developer';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_colorpicker/src/material_picker.dart';
-import 'package:sleek_circular_slider/sleek_circular_slider.dart';
 
 
 class NuovoArticolo extends StatelessWidget{

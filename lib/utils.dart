@@ -1,11 +1,13 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:backdrop/backdrop.dart';
 import 'screens/profile.dart';
 import 'package:image_picker/image_picker.dart';
 import 'screens/articolo.dart';
+import 'package:animations/animations.dart';
+import 'package:provider/provider.dart';
+import 'main.dart';
+import 'dart:developer';
 
 class CardExtended extends StatelessWidget{
   const CardExtended({Key? key}) : super(key: key);
@@ -87,19 +89,48 @@ class WidgetOptions{
 }
 
 
-
-class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
+class MyAppBar extends StatelessWidget implements PreferredSizeWidget{
+  final AnimationController animationController;
   final String screenTitle;
   final List<Widget> actionList ;
+  const MyAppBar({required this.screenTitle, required this.actionList, required this.animationController});
 
-  MyAppBar({required this.screenTitle, this.actionList = const[] });
+
+/*  @override
+  void initState() {
+    super.initState();
+    animationController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 500),
+    );
+  }*/
+
+  void repeatOnce() async {
+    await animationController.forward();
+    await animationController.reverse();
+  }
+
+/*
+  @override
+  void dispose() {
+    animationController.dispose();
+    super.dispose();
+  }
+*/
 
   @override
   Widget build(BuildContext context) {
-    return AppBar(
-        title: Text(screenTitle),
-        elevation: 0,
-        actions: actionList
+    return Consumer<BaseModel>(
+      builder: (context,base,child) {
+        log("Inside App Bar");
+        return AppBar(
+            title: Text('asd${base.selIndex}'),
+            elevation: 0,
+            actions: [IconButton(onPressed: () {
+
+            }, icon: Icon(Icons.settings))]
+        );
+      }
     );
   }
 
