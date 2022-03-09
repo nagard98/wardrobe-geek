@@ -1,21 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:backdrop/backdrop.dart';
-import '../utils.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:developer';
 import 'package:sleek_circular_slider/sleek_circular_slider.dart';
-
-/*
-
-class Profile extends StatelessWidget{
-  @override
-  Widget build(BuildContext context) {
-    return ProfileFrontLayer();
-  }
-
-}
-*/
-
 
 class ProfileAppBar extends BackdropAppBar{
   @override

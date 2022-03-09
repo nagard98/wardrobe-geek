@@ -1,7 +1,8 @@
+import 'package:esempio/models/article_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:backdrop/backdrop.dart';
-import '../utils.dart';
+import '../common/utils.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:developer';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
@@ -227,7 +228,7 @@ class NuovoArticolo extends StatelessWidget{
 
 
 class Articolo extends StatelessWidget{
-  const Articolo({Key? key}) : super(key: key);
+  const Articolo({Key? key, ArticleModel? articleModel}) : super(key: key);
 
   static Future pickImage() async{
     log("Testing camera");

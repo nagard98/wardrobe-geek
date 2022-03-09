@@ -1,23 +1,25 @@
-import 'package:flutter/cupertino.dart';
+import 'dart:io' as io;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:backdrop/backdrop.dart';
 import 'screens/explore.dart';
 import 'screens/profile.dart';
 import 'screens/my_outfits.dart';
 import 'screens/wardrobe.dart';
 import 'screens/wishlist.dart';
-import 'utils.dart';
-import 'package:camera/camera.dart';
+import 'common/utils.dart' as utils;
 import 'dart:developer';
 import 'package:animations/animations.dart';
 import 'package:bluejay/bluejay.dart';
 import 'package:provider/provider.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:auto_animated/auto_animated.dart';
 
 //TO-DO: Cambiare versione minima sdk
 
-void main() {
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  io.Directory docsDir = await getApplicationDocumentsDirectory();
+  utils.docsDir = docsDir;
   runApp(const MyApp());
 }
 

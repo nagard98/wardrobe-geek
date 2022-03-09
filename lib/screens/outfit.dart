@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:backdrop/backdrop.dart';
-import '../utils.dart';
+import '../common/utils.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:developer';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';

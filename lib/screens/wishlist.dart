@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:backdrop/backdrop.dart';
-import '../utils.dart';
+import '../common/utils.dart';
 import 'package:shimmer/shimmer.dart';
 
 
@@ -64,7 +64,7 @@ class WishlistFrontLayerState extends State<WishlistFrontLayer> {
   Future loadData() async {
     setState(() => isLoading = true);
 
-    await Future.delayed(Duration(seconds: 2), () {});
+    await Future.delayed(Duration(seconds: 1), () {});
     items = List.of(allItems);
     if(mounted) setState(() => isLoading = false);
   }

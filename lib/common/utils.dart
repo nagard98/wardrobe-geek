@@ -1,13 +1,16 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:backdrop/backdrop.dart';
-import 'screens/profile.dart';
+import '../screens/profile.dart';
 import 'package:image_picker/image_picker.dart';
-import 'screens/articolo.dart';
+import '../screens/articolo.dart';
 import 'package:animations/animations.dart';
 import 'package:provider/provider.dart';
-import 'main.dart';
+import '../main.dart';
 import 'dart:developer';
+
+late Directory docsDir;
 
 class CardExtended extends StatelessWidget{
   const CardExtended({Key? key}) : super(key: key);
