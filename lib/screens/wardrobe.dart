@@ -13,9 +13,7 @@ class WardrobeAppBar extends BackdropAppBar {
   Widget build(BuildContext context) {
     return BackdropAppBar(
       automaticallyImplyLeading: false,
-      actions: const [
-        BackdropToggleButton()
-      ],
+      actions: const [BackdropToggleButton()],
       title: Text('Wardrobe'),
     );
   }
@@ -25,21 +23,20 @@ class WardrobeBackLayer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: const [
-          ListTile(
-            title: Text("Elemento 1"),
-          ),
-          ListTile(
-            title: Text("Elemento 2"),
-          ),
-          ListTile(
-            title: Text("Elemento 3"),
-          )
-        ],
-      )
-    );
+        child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: const [
+        ListTile(
+          title: Text("Elemento 1"),
+        ),
+        ListTile(
+          title: Text("Elemento 2"),
+        ),
+        ListTile(
+          title: Text("Elemento 3"),
+        )
+      ],
+    ));
   }
 }
 
@@ -116,6 +113,15 @@ class WardrobeFrontLayerState extends State<WardrobeFrontLayer> {
               title: Text("Titolo"),
             ),
           ),
+          Positioned(
+            right: 10,
+            bottom: 10,
+            child: FloatingActionButton(child: Icon(Icons.add), onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) {
+                return NuovoArticolo();
+              }));
+            }),
+          )
         ],
       ),
     );
