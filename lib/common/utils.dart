@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:backdrop/backdrop.dart';
 import '../screens/profile.dart';
 import 'package:image_picker/image_picker.dart';
-import '../screens/articolo.dart';
+import '../screens/article.dart';
 import 'package:animations/animations.dart';
 import 'package:provider/provider.dart';
 import '../main.dart';

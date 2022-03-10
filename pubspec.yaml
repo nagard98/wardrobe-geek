@@ -58,6 +58,7 @@ dev_dependencies:
   auto_animated: ^3.0.1
   path: 1.8.0
   sqflite: ^2.0.2
+  flex_color_picker: ^2.3.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

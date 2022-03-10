@@ -3,6 +3,7 @@ import 'package:esempio/models/wardrobe_model.dart';
 import 'package:esempio/common/utils.dart' as utils;
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:flutter/material.dart';
 
 class ArticleDBWorker {
   ArticleDBWorker._();
@@ -13,12 +14,13 @@ class ArticleDBWorker {
 
   Future<Database?> _getDB() async {
     if (_db == null) {
-      String path = join(utils.docsDir.path, "wardrobe_geek.db");
+      String path = join(utils.docsDir.path, "wardrobe_geek2.db");
       _db = await openDatabase(path, version: 1,
           onCreate: (Database inDB, int inVersion) async {
         await inDB.execute('CREATE TABLE IF NOT EXISTS articles ('
             'idArticle INTEGER PRIMARY KEY,'
             'idUser INTEGER NOT NULL,'
+            'imgPath TEXT NOT NULL,'
             'articleName TEXT NOT NULL,'
             'primColor INTEGER NOT NULL,'
             'secColor INTEGER NULL,'
@@ -30,15 +32,16 @@ class ArticleDBWorker {
     return _db;
   }
 
-  ArticleModel articleFromMap(Map<String,Object?> ?map) {
+  ArticleModel articleFromMap(Map<String,dynamic?> ?map) {
     ArticleModel article = ArticleModel(
         id: map!['idArticle'] as int,
         articleName: map['articleName'] as String,
-        primaryColor: ArticleColor.values[map['primColor'] as int],
-        secondaryColor: ArticleColor.values[map['secColor'] as int],
+        imgPath: map['imgPath'] ?? "",
+        primaryColor: Color(map['primColor'] as int),
+        secondaryColor: Color(map['secColor'] as int),
         brand: Brand.values[map['brand'] as int],
         clothingType: ClothingType.values[map['clothingType'] as int] ,
-        favorite: map['fav'] as bool);
+        favorite: map['fav'] == 0 ? false : true);
     return article;
   }
 
@@ -46,11 +49,12 @@ class ArticleDBWorker {
     Map<String,dynamic> map = Map<String,dynamic>();
     map['idArticle'] = article.id;
     map['idUser'] = idUser;
+    map['imgPath'] = article.imgPath;
     map['articleName'] = article.articleName;
-    map['primColor'] = article.primaryColor.index;
-    map['secColor'] = article.secondaryColor.index;
-    map['brand'] = article.brand.index;
-    map['clothingType'] = article.clothingType.index;
+    map['primColor'] = article.primaryColor!.value;
+    map['secColor'] = article.secondaryColor?.value;
+    map['brand'] = article.brand!.index;
+    map['clothingType'] = article.clothingType!.index;
     map['fav'] = article.favorite as int;
 
     return map;
@@ -61,23 +65,22 @@ class ArticleDBWorker {
 
     var val =
         await _db?.rawQuery('SELECT MAX(idArticle)+1 AS id from articles');
-    int nextId = val?.first['id'] as int;
-    if (nextId == null) {
-      nextId = 1;
-    }
+    int nextId = val?.first['id'] == null ? 1 : val!.first['id'] as int;
     article.id = nextId;
+    article.imgPath = join(utils.docsDir.path,'${article.id}.jpg');
 
     return await _db?.rawInsert(
-        'INSERT INTO articles (idArticle, idUser, articleName, primColor, secColor, brand, clothingType, fav)'
-        'VALUES (?,?,?,?,?,?,?,?)',
+        'INSERT INTO articles (idArticle, idUser, imgPath, articleName, primColor, secColor, brand, clothingType, fav)'
+        'VALUES (?,?,?,?,?,?,?,?,?)',
         [
           article.id,
           idUser,
+          article.imgPath,
           article.articleName,
-          article.primaryColor,
-          article.secondaryColor,
-          article.brand,
-          article.clothingType,
+          article.primaryColor?.value,
+          article.secondaryColor?.value,
+          article.brand?.index,
+          article.clothingType?.index,
           article.favorite
         ]);
   }
@@ -92,7 +95,7 @@ class ArticleDBWorker {
   Future<List<dynamic>?> getAll(int idUser) async {
     Database? db = await _getDB();
     var recs = await _db?.query('articles',where: 'idUser=?', whereArgs: [idUser]);
-    var list = recs != null ? [] : recs?.map((m) => articleFromMap(m)).toList();
+    var list = recs == null ? [] : recs.map((m) => articleFromMap(m)).toList();
     return list;
   }
 

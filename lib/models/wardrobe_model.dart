@@ -1,20 +1,15 @@
 import 'dart:developer';
+import 'package:esempio/models/profile_model.dart';
 import 'package:provider/provider.dart';
 import 'package:esempio/db/db_worker.dart';
 import 'package:esempio/models/article_model.dart';
 import 'package:flutter/material.dart';
 
 class WardrobeModel extends ChangeNotifier {
-  List<ArticleModel>? articles = [
-    ArticleModel(
-        articleName: "test",
-        favorite: true,
-        primaryColor: ArticleColor.blue,
-        brand: Brand.armani,
-        clothingType: ClothingType.camicia,
-        secondaryColor: ArticleColor.pink)
-  ];
+  List<ArticleModel>? articles = [];
+  ArticleModel? currentArticle;
   bool isLoading = false;
+  bool isEditing = false;
 
   List<ArticleModel> filter() {
     //TODO: implementa filtro
@@ -31,10 +26,10 @@ class WardrobeModel extends ChangeNotifier {
     throw UnimplementedError();
   }
 
-  void loadArticles(ArticleDBWorker articleDBWorker) async {
+  void loadArticles(ArticleDBWorker articleDBWorker, ProfileModel profile) async {
     isLoading = true;
-    //articles = (await articleDBWorker.getAll(1))?.cast<ArticleModel>();
-    await Future.delayed(Duration(seconds: 6), () {});
+    articles = (await articleDBWorker.getAll(profile.id as int))?.cast<ArticleModel>();
+    await Future.delayed(Duration(seconds: 1), () {});
     isLoading = false;
     log(isLoading.toString());
     notifyListeners();
