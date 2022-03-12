@@ -212,6 +212,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.6.3"
+  like_button:
+    dependency: "direct dev"
+    description:
+      name: like_button
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.4"
   lints:
     dependency: transitive
     description:
@@ -240,6 +247,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.7.0"
+  morpheus:
+    dependency: "direct dev"
+    description:
+      name: morpheus
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.2.3"
   nested:
     dependency: transitive
     description:

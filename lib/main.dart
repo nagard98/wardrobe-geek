@@ -9,7 +9,6 @@ import 'screens/wishlist.dart';
 import 'common/utils.dart' as utils;
 import 'dart:developer';
 import 'package:animations/animations.dart';
-import 'package:bluejay/bluejay.dart';
 import 'package:provider/provider.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:auto_animated/auto_animated.dart';
@@ -38,9 +37,8 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           // Define the default brightness and colors.
           brightness: Brightness.light,
-          primaryColor: Colors.orange,
-          backgroundColor: Colors.orange,
-          appBarTheme: AppBarTheme(backgroundColor: Colors.orange),
+          primaryColor: Colors.pinkAccent,
+          appBarTheme: AppBarTheme(backgroundColor: Colors.pinkAccent),
 
           fontFamily: 'Montserrat',
 
@@ -124,6 +122,7 @@ class _BaseRouteState extends State<BaseRoute>{
   @override
   Widget build(BuildContext context) {
     return BackdropScaffold(
+      frontLayerBackgroundColor: Colors.pink,
       stickyFrontLayer: true,
       appBar: PreferredSize(
         child: Consumer<BaseModel>(
@@ -144,7 +143,7 @@ class _BaseRouteState extends State<BaseRoute>{
                     Animation<double> animation,
                     Animation<double> secondaryAnimation,) {
                   return FadeThroughTransition(
-                    fillColor: Colors.orange,
+                    fillColor: Colors.pinkAccent,
                     animation: animation,
                     secondaryAnimation: secondaryAnimation,
                     child: child,
@@ -164,7 +163,7 @@ class _BaseRouteState extends State<BaseRoute>{
           builder: (context, baseModel, child){
             log("Inside Bottom Nav");
             return BottomNavigationBar(
-              backgroundColor: Colors.orange,
+              backgroundColor: Colors.pinkAccent,
               selectedItemColor: Colors.blue,
               type: BottomNavigationBarType.fixed,
               onTap: (index) {
@@ -198,52 +197,5 @@ class _BaseRouteState extends State<BaseRoute>{
         );
       }),
     );
-
-    /*return BackdropScaffold(
-      backLayerBackgroundColor: Theme.of(context).backgroundColor,
-      frontLayerBackgroundColor: Colors.pink,
-      frontLayerBorderRadius: _frontLayerBorderRadius,
-      subHeader: _subheader,
-      appBar: _appBar,
-      frontLayer: _frontLayer,
-      backLayer: _backLayer,
-      floatingActionButton: _floatingActionButton,
-      bottomNavigationBar: Builder(
-        builder: (BuildContext context){
-          return BottomNavigationBar(
-            backgroundColor: Colors.orange,
-            selectedItemColor: Colors.blue,
-            type: BottomNavigationBarType.fixed,
-            onTap: (index) {
-              Backdrop.of(context).concealBackLayer();
-              _onItemTapped(index);
-            },
-            currentIndex: _selectedIndex,
-            items: <BottomNavigationBarItem>[
-              BottomNavigationBarItem(
-                icon: Icon(Icons.home),
-                label: "Wardrobe",
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.architecture),
-                label: "MyOutfits",
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.explore),
-                label: "Explore",
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.favorite),
-                label: "Wishlist",
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.person),
-                label: "Profile",
-              ),
-            ],
-          );
-        },
-      )
-    );*/
   }
 }

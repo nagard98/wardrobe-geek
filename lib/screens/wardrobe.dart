@@ -1,6 +1,8 @@
 import 'dart:developer';
 import 'package:esempio/models/article_model.dart';
 import 'package:esempio/models/profile_model.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:backdrop/backdrop.dart';
@@ -10,6 +12,8 @@ import 'article.dart';
 import 'package:esempio/models/wardrobe_model.dart';
 import 'package:esempio/db/db_worker.dart';
 import 'dart:io';
+import 'package:morpheus/morpheus.dart';
+import 'package:like_button/like_button.dart';
 
 class WardrobeAppBar extends BackdropAppBar {
   WardrobeAppBar({Key? key}) : super(key: key);
@@ -40,24 +44,86 @@ class WardrobeBackLayer extends StatefulWidget {
   }
 }
 
+class ActorFilterEntry {
+  const ActorFilterEntry(this.name, this.initials);
+
+  final String name;
+  final String initials;
+}
+
 class WardrobeBackLayerState extends State<WardrobeBackLayer> {
+  final List<ActorFilterEntry> _cast = <ActorFilterEntry>[
+    const ActorFilterEntry('Aaron Burr', 'AB'),
+    const ActorFilterEntry('Alexander Hamilton', 'AH'),
+    const ActorFilterEntry('Eliza Hamilton', 'EH'),
+    const ActorFilterEntry('James Madison', 'JM'),
+  ];
+  final List<String> _filters = <String>[];
+
+  Iterable<Widget> get actorWidgets {
+    return _cast.map((ActorFilterEntry actor) {
+      return Padding(
+        padding: const EdgeInsets.all(4.0),
+        child: FilterChip(
+          avatar: CircleAvatar(child: Text(actor.initials)),
+          label: Text(actor.name),
+          selected: _filters.contains(actor.name),
+          onSelected: (bool value) {
+            setState(() {
+              if (value) {
+                _filters.add(actor.name);
+              } else {
+                _filters.removeWhere((String name) {
+                  return name == actor.name;
+                });
+              }
+            });
+          },
+        ),
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-        child: Column(
-      mainAxisSize: MainAxisSize.min,
-      children: const [
-        ListTile(
-          title: Text("Elemento 1"),
+    return ListView(
+      scrollDirection: Axis.vertical,
+      shrinkWrap: true,
+      children: [
+        Container(
+          height: 80,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            children: actorWidgets.toList(),
+          ),
         ),
-        ListTile(
-          title: Text("Elemento 2"),
+        Container(
+          height: 80,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            children: actorWidgets.toList(),
+          ),
         ),
-        ListTile(
-          title: Text("Elemento 3"),
+        Container(
+          height: 80,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            children: actorWidgets.toList(),
+          ),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            /*Expanded(
+              child: FloatingActionButton.extended(
+                  label: Text("Apply"), onPressed: () {}),
+            ),
+            FloatingActionButton.extended(label: Text("Reset"), onPressed: () {})*/
+          ],
         )
       ],
-    ));
+    );
   }
 }
 
@@ -97,11 +163,11 @@ class WardrobeFrontLayerState extends State<WardrobeFrontLayer> {
           log(wardrobe.articles.toString());
           return Stack(
             children: [
-              Container(
-                margin: EdgeInsets.only(top: 52),
+              Padding(
+                padding: EdgeInsets.only(top: 52),
                 child: GridView.builder(
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    childAspectRatio: 1,
+                    childAspectRatio: 1.3,
                     crossAxisCount: 2,
                     crossAxisSpacing: 8,
                     mainAxisSpacing: 8,
@@ -110,23 +176,9 @@ class WardrobeFrontLayerState extends State<WardrobeFrontLayer> {
                     if (wardrobe.isLoading) {
                       return buildCardShimmer();
                     } else {
-                      return InkWell(
-                        onTap: () => Navigator.push(context,
-                            MaterialPageRoute(builder: (context) {
-                          return Articolo(
-                              article: wardrobe.articles!.elementAt(index));
-                        })),
-                        child: Card(
-                          child: Hero(
-                              tag:
-                                  "articolo${wardrobe.articles!.elementAt(index).id}",
-                              child: Image.file(
-                                File(wardrobe.articles!
-                                    .elementAt(index)
-                                    .imgPath!),
-                                fit: BoxFit.cover,
-                              )),
-                        ),
+                      return ArticleCard(
+                        index: index,
+                        wardrobe: wardrobe,
                       );
                     }
                   },
@@ -134,6 +186,7 @@ class WardrobeFrontLayerState extends State<WardrobeFrontLayer> {
                 ),
               ),
               Container(
+                color: Colors.white,
                 child: BackdropSubHeader(
                   title: Text("Titolo"),
                 ),
@@ -154,6 +207,56 @@ class WardrobeFrontLayerState extends State<WardrobeFrontLayer> {
             ],
           );
         }),
+      ),
+    );
+  }
+}
+
+class ArticleCard extends StatelessWidget {
+  ArticleCard({required this.wardrobe, required this.index});
+
+  WardrobeModel wardrobe;
+  int index;
+
+  void _handleTap(BuildContext context, GlobalKey parentKey) {
+    Navigator.of(context).push(MorpheusPageRoute(
+      builder: (context) => Articolo(article: wardrobe.articles!.elementAt(index)),
+      parentKey: parentKey,
+    ));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final _parentKey = GlobalKey();
+    return InkWell(
+      key: _parentKey,
+      onTap: () => _handleTap(context, _parentKey),
+      child: Card(
+        clipBehavior: Clip.hardEdge,
+        child: Row(
+          children: [
+            Expanded(
+              flex: 3,
+              child: Hero(
+                tag: "articolo${wardrobe.articles!.elementAt(index).id}",
+                child: Image.file(
+                  File(wardrobe.articles!.elementAt(index).imgPath!),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 1,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  LikeButton(),
+                  IconButton(onPressed: (){}, icon: Icon(Icons.more_vert))
+                ],
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
