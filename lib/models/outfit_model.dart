@@ -1,25 +1,28 @@
 import 'package:esempio/models/article_model.dart';
 import 'package:flutter/widgets.dart';
 
+enum Season {estate, inverno, primavera, autunno, qualsiasi}
+enum DressCode {casual, formalCasual, informale, streetwear, businessCasual, altro}
+
 class OutfitModel {
   int? id;
-  List<ArticleModel> articles;
-  String season;
-  String situation;
-  String designer;
-  int nLikes;
-  List<Image> outfitImages;
-  DateTime addedOn;
-  bool favorite;
+  int? idUser;
+  List<ArticleModel>? articles;
+  Season? season;
+  DressCode? dressCode;
+  int? likes = 0;
+  String? imgPath;
+  DateTime? addedOn;
+  bool? favorite = false;
 
   OutfitModel(
       {this.id,
-      required this.articles,
-      required this.season,
-      required this.situation,
-      required this.designer,
-      required this.addedOn,
-      required this.favorite,
-      required this.nLikes,
-      required this.outfitImages});
+      this.articles,
+      this.season,
+      this.dressCode,
+      this.idUser,
+      this.addedOn,
+      this.favorite,
+      this.likes,
+      this.imgPath});
 }

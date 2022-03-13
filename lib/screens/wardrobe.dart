@@ -10,7 +10,7 @@ import '../common/utils.dart';
 import 'package:shimmer/shimmer.dart';
 import 'article.dart';
 import 'package:esempio/models/wardrobe_model.dart';
-import 'package:esempio/db/db_worker.dart';
+import 'package:esempio/db/article_db_worker.dart';
 import 'dart:io';
 import 'package:morpheus/morpheus.dart';
 import 'package:like_button/like_button.dart';
@@ -143,8 +143,6 @@ class WardrobeFrontLayerState extends State<WardrobeFrontLayer> {
       child: Card(),
       baseColor: Color(0xFFC4C3C3),
       highlightColor: Color(0xFFEFEFEF));
-
-  Widget buildCard(CardItem card) => card;
 
   List<CardItem> items = [];
   bool isLoading = false;

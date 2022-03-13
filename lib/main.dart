@@ -58,7 +58,7 @@ class MyApp extends StatelessWidget {
 }
 
 class BaseModel extends ChangeNotifier {
-  int selIndex = 0;
+  int selIndex = 1;
 
   void increaseIndex() {
     this.selIndex++;

@@ -14,7 +14,7 @@ class ArticleDBWorker {
 
   Future<Database?> _getDB() async {
     if (_db == null) {
-      String path = join(utils.docsDir.path, "wardrobe_geek2.db");
+      String path = join(utils.docsDir.path, "wardrobe_geek3.db");
       _db = await openDatabase(path, version: 1,
           onCreate: (Database inDB, int inVersion) async {
         await inDB.execute('CREATE TABLE IF NOT EXISTS articles ('
@@ -27,12 +27,27 @@ class ArticleDBWorker {
             'brand INTEGER NOT NULL,'
             'clothingType INTEGER NOT NULL,'
             'fav INTEGER NOT NULL)');
+
+        await inDB.execute('CREATE TABLE IF NOT EXISTS outfits ('
+            'idOutfit INTEGER PRIMARY KEY,'
+            'idUser INTEGER NOT NULL,'
+            'season INTEGER NOT NULL,'
+            'likes INTEGER NOT NULL,'
+            'imgPath TEXT NOT NULL,'
+            'addedOn INTEGER NOT NULL,'
+            'favorite INTEGER NOT NULL,'
+            'dressCode INTEGER NOT NULL);');
+
+        await inDB.execute('CREATE TABLE IF NOT EXISTS outfit_articles ('
+            'idOutfit INTEGER NOT NULL,'
+            'idArticle INTEGER NOT NULL,'
+            'PRIMARY KEY(idOutfit, idArticle) );');
       });
     }
     return _db;
   }
 
-  ArticleModel articleFromMap(Map<String,dynamic?> ?map) {
+  ArticleModel articleFromMap(Map<String,dynamic> ?map) {
     ArticleModel article = ArticleModel(
         id: map!['idArticle'] as int,
         articleName: map['articleName'] as String,

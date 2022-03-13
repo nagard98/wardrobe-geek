@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:developer';
 import 'package:flex_color_picker/flex_color_picker.dart';
-import 'package:esempio/db/db_worker.dart';
+import 'package:esempio/db/article_db_worker.dart';
 import 'package:esempio/models/profile_model.dart';
 import 'package:esempio/common/utils.dart' as utils;
 import 'package:path/path.dart';
@@ -15,7 +15,7 @@ class ColorFormField extends FormField<Color>{
     required BuildContext context,
     FormFieldSetter<Color>? onSaved,
     FormFieldValidator<Color>? validator,
-    Color initialValue = Colors.red,
+    Color initialValue = Colors.white,
     bool autovalidate = false
   }) : super(
       onSaved: onSaved,
@@ -75,6 +75,7 @@ class NuovoArticolo extends StatelessWidget {
 
   _save(BuildContext context) async{
     _formKey.currentState!.save();
+    //TODO: Add validation to input
     
     if(wardrobeModel.currentArticle?.id == null){
       await ArticleDBWorker.articleDBWorker.create(wardrobeModel.currentArticle as ArticleModel, profile.id as int );
@@ -117,8 +118,8 @@ class NuovoArticolo extends StatelessWidget {
                     ),
                     Container(
                       decoration: BoxDecoration(
-                          color: Colors.pink,
-                          border: Border.all(width: 0, color: Colors.pink),
+                          color: Colors.white,
+                          border: Border.all(width: 0, color: Colors.white),
                           borderRadius: const BorderRadius.only(
                               topLeft: Radius.circular(20),
                               topRight: Radius.circular(20))),
@@ -127,51 +128,39 @@ class NuovoArticolo extends StatelessWidget {
                     ),
                     Container(
                       margin: EdgeInsets.only(top: 40),
-                      child: InkWell(
-                        /*onTap: () {
-                          Navigator.push(context,
-                              MaterialPageRoute(builder: (_) {
-                                return FullScreenImage(imageUrl: "https://picsum.photos/500?image=25", tag:"articolo");
-                              })
-                          );
-                        },*/
-                        child: Hero(
-                          tag: "articolo",
-                          child: Container(
-                            width: 250,
-                            height: 250,
-                            child: Card(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  OutlinedButton(
-                                    onPressed: () {
-                                      chooseImage(ImageSource.camera);
-                                    },
-                                    child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: const [
-                                          Icon(Icons.photo_camera),
-                                          Text("Fai Foto")
-                                        ]),
-                                  ),
-                                  Text("oppure"),
-                                  OutlinedButton(
-                                    onPressed: () {
-                                      chooseImage(ImageSource.gallery);
-                                    },
-                                    child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: const [
-                                          Icon(Icons.collections),
-                                          Text("Scegli da Galleria")
-                                        ]),
-                                  )
-                                ],
+                      child: Container(
+                        width: 250,
+                        height: 250,
+                        child: Card(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              OutlinedButton(
+                                onPressed: () {
+                                  chooseImage(ImageSource.camera);
+                                },
+                                child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.center,
+                                    children: const [
+                                      Icon(Icons.photo_camera),
+                                      Text("Fai Foto")
+                                    ]),
                               ),
-                            ),
+                              Text("oppure"),
+                              OutlinedButton(
+                                onPressed: () {
+                                  chooseImage(ImageSource.gallery);
+                                },
+                                child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.center,
+                                    children: const [
+                                      Icon(Icons.collections),
+                                      Text("Scegli da Galleria")
+                                    ]),
+                              )
+                            ],
                           ),
                         ),
                       ),
@@ -186,8 +175,8 @@ class NuovoArticolo extends StatelessWidget {
                   (context, index) => Container(
                         padding: EdgeInsets.only(left: 35, top: 20, right: 35),
                         decoration: BoxDecoration(
-                            color: Colors.pink,
-                            border: Border.all(width: 0, color: Colors.pink)),
+                            color: Colors.white,
+                            border: Border.all(width: 0, color: Colors.white)),
                         child: Column(
                           children: [
                             TextFormField(
@@ -205,7 +194,7 @@ class NuovoArticolo extends StatelessWidget {
                                   ),
                                   focusedBorder: OutlineInputBorder(
                                     borderSide: const BorderSide(
-                                        width: 2, color: Colors.red),
+                                        width: 2, color: Colors.white),
                                     borderRadius: BorderRadius.circular(10),
                                   )),
                             ),
@@ -307,10 +296,10 @@ class NuovoArticolo extends StatelessWidget {
                   Expanded(
                       child: Container(
                           decoration: BoxDecoration(
-                              color: Colors.pink,
+                              color: Colors.white,
                               border: Border.all(
                                   width: 0,
-                                  color: Colors.pink,
+                                  color: Colors.white,
                                   style: BorderStyle.none))))
                 ],
               ),
@@ -350,13 +339,14 @@ class Articolo extends StatelessWidget {
                 children: [
                   Container(
                     decoration: BoxDecoration(
+
                         color: Theme.of(context).appBarTheme.backgroundColor),
                     height: 220,
                   ),
                   Container(
                     decoration: BoxDecoration(
-                        color: Colors.pink,
-                        border: Border.all(width: 0, color: Colors.pink),
+                        color: Colors.white,
+                        border: Border.all(width: 0, color: Colors.white),
                         borderRadius: const BorderRadius.only(
                             topLeft: Radius.circular(20),
                             topRight: Radius.circular(20))),
@@ -399,8 +389,8 @@ class Articolo extends StatelessWidget {
                 (context, index) => Container(
                       padding: const EdgeInsets.only(left: 35, right: 35),
                       decoration: BoxDecoration(
-                          color: Colors.pink,
-                          border: Border.all(width: 0, color: Colors.pink)),
+                          color: Colors.white,
+                          border: Border.all(width: 0, color: Colors.white)),
                       child: Column(
                         children: [
                           Container(
@@ -460,10 +450,10 @@ class Articolo extends StatelessWidget {
                 Expanded(
                     child: Container(
                         decoration: BoxDecoration(
-                            color: Colors.pink,
+                            color: Colors.white,
                             border: Border.all(
                                 width: 0,
-                                color: Colors.pink,
+                                color: Colors.white,
                                 style: BorderStyle.none))))
               ],
             ),
