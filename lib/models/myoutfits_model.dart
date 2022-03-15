@@ -22,14 +22,20 @@ class MyOutfitsModel extends ChangeNotifier{
     throw UnimplementedError();
   }
 
-  bool removeOutfit(){
-    //TODO: implementa rimozione outfit
-    throw UnimplementedError();
+  void removeOutfit(OutfitDBWorker outfitDBWorker, int idOutfit, ProfileModel profile) async{
+    await outfitDBWorker.delete(idOutfit);
+    loadOutfits(outfitDBWorker, profile);
+  }
+
+  void updateOutfit(OutfitDBWorker outfitDBWorker, OutfitModel outfitModel, ProfileModel profile,
+      {bool withReload = true}) async{
+    await outfitDBWorker.update(outfitModel, profile.id!);
+    if(withReload) loadOutfits(outfitDBWorker, profile);
   }
 
   void loadOutfits(OutfitDBWorker outfitDBWorker, ProfileModel profile) async {
     isLoading = true;
-    await Future.delayed(Duration(seconds: 1), () {});
+    await Future.delayed(const Duration(milliseconds: 500), () {});
     outfits = (await outfitDBWorker.getAll(profile.id as int))?.cast<OutfitModel>();
     isLoading = false;
     log(isLoading.toString());

@@ -1,89 +1,81 @@
 import 'dart:io';
-
-import 'package:esempio/db/outfit_db_worker.dart';
-import 'package:esempio/db/outfit_db_worker.dart';
 import 'package:esempio/db/outfit_db_worker.dart';
 import 'package:esempio/models/myoutfits_model.dart';
 import 'package:esempio/models/outfit_model.dart';
-import 'package:esempio/models/outfit_model.dart';
 import 'package:esempio/models/wardrobe_model.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:backdrop/backdrop.dart';
-import '../common/utils.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:developer';
 import 'package:esempio/common/utils.dart' as utils;
 import 'package:path/path.dart';
 import 'package:esempio/models/profile_model.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:flutter_colorpicker/src/material_picker.dart';
-import 'package:sleek_circular_slider/sleek_circular_slider.dart';
 import 'package:flutter_multi_select_items/flutter_multi_select_items.dart';
 import 'package:esempio/models/article_model.dart';
 
 class Outfit extends StatelessWidget {
   final int heroIndex;
+  final OutfitModel outfit;
 
-  const Outfit({Key? key, this.heroIndex = 0}) : super(key: key);
-
-  static Future pickImage() async {
-    log("Testing camera");
-    final image = await ImagePicker().pickImage(source: ImageSource.camera);
-  }
+  const Outfit({Key? key, required this.outfit, this.heroIndex = 0})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Nome Outfit"),
-        elevation: 0,
-      ),
+      backgroundColor: Colors.lightBlueAccent,
       body: CustomScrollView(
         slivers: [
+          const SliverAppBar(
+            title: Text("Nome Outfit"),
+            pinned: true,
+            snap: false,
+            floating: false,
+            expandedHeight: 100,
+          ),
           SliverList(
             delegate: SliverChildBuilderDelegate(
               (context, index) => Stack(
                 alignment: Alignment.topLeft,
-                clipBehavior: Clip.none,
+                clipBehavior: Clip.hardEdge,
                 children: [
                   Container(
                     decoration: BoxDecoration(
-                        color: Theme.of(context).appBarTheme.backgroundColor),
+                        color: Theme.of(context).appBarTheme.backgroundColor,
+                    ),
                     height: 300,
                   ),
                   Container(
                     decoration: BoxDecoration(
                         color: Colors.white,
-                        border: Border.all(width: 0, color: Colors.white),
+                        border: Border.all(width: 0,style: BorderStyle.none, color: Colors.lightBlueAccent),
                         borderRadius: BorderRadius.only(
                             topLeft: Radius.circular(20),
                             topRight: Radius.circular(20))),
                     height: 130,
-                    margin: EdgeInsets.only(top: 270),
+                    margin: EdgeInsets.only(top: 230),
                   ),
                   Row(
                     children: [
                       Flexible(
                         flex: 7,
                         child: Container(
-                          margin: EdgeInsets.only(top: 40, left: 0),
                           child: InkWell(
-                            child: Hero(
-                              tag: "outfit$heroIndex",
-                              child: Container(
-                                height: 285,
-                                child: Card(
-                                  clipBehavior: Clip.hardEdge,
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.only(
-                                          topLeft: Radius.zero,
-                                          topRight: Radius.circular(20),
-                                          bottomLeft: Radius.zero,
-                                          bottomRight: Radius.circular(20))),
-                                  margin: EdgeInsets.zero,
-                                  child: Image.network(
-                                    'https://picsum.photos/500/750?image=35',
+                            child: Container(
+                              height: 285,
+                              child: Card(
+                                clipBehavior: Clip.hardEdge,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.only(
+                                        topLeft: Radius.zero,
+                                        topRight: Radius.circular(20),
+                                        bottomLeft: Radius.zero,
+                                        bottomRight: Radius.circular(20))),
+                                margin: EdgeInsets.zero,
+                                child: Hero(
+                                  tag: 'outfit${outfit.id}',
+                                  child: Image.file(
+                                    //TODO:Crea mosaico se manca
+                                    File(outfit.imgPath.toString()),
                                     fit: BoxFit.fitHeight,
                                   ),
                                 ),
@@ -92,10 +84,9 @@ class Outfit extends StatelessWidget {
                             onTap: () {
                               Navigator.push(context,
                                   MaterialPageRoute(builder: (_) {
-                                return FullScreenImage(
-                                    imageUrl:
-                                        "https://picsum.photos/500/750?image=35",
-                                    tag: "outfit$heroIndex");
+                                return utils.FullScreenImage(
+                                    image: File(outfit.imgPath.toString()),
+                                    tag: "outfit${outfit.id}");
                               }));
                             },
                           ),
@@ -106,11 +97,9 @@ class Outfit extends StatelessWidget {
                           flex: 8,
                           child: Column(
                             children: [
-                              Text("TITOLO"),
-                              Text("Brand"),
-                              Text("Colore"),
-                              Text("Stagione"),
-                              Text("Designer")
+                              Text("Stagione: ${outfit.season}"),
+                              Text("Dress Code: ${outfit.dressCode}"),
+                              Text("Designer: ${profile.username}")
                             ],
                           ))
                     ],
@@ -123,22 +112,54 @@ class Outfit extends StatelessWidget {
           SliverList(
             delegate: SliverChildBuilderDelegate(
                 (context, index) => Container(
-                      padding: EdgeInsets.only(left: 15, right: 15),
-                      decoration: BoxDecoration(
-                          color: Colors.white,
-                          border: Border.all(width: 0, color: Colors.white)),
-                      child: Column(
-                        children: [
-                          Material(
-                            color: Colors.blue,
-                            child: ListTile(
-                              tileColor: Colors.blue,
-                              leading: Icon(Icons.ten_k),
+                      color: Colors.white,
+                      child: GridView.builder(
+                        padding: EdgeInsets.only(left: 15, right: 15),
+                        primary: false,
+                        itemCount: outfit.articles?.length,
+                        shrinkWrap: true,
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 1,
+                          childAspectRatio: 3.5,
+                        ),
+                        itemBuilder: (context, indexGrid) {
+                          return Card(
+                            color: Colors.lightBlueAccent,
+                            clipBehavior: Clip.hardEdge,
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  flex: 2,
+                                  child: Image.file(
+                                    File(join(utils.docsDir.path, 'articles',
+                                        outfit.articles?[indexGrid].imgPath)),
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                                Expanded(
+                                  flex: 2,
+                                  child: Text(outfit.articles?[indexGrid].brand.toString() as String),
+                                ),
+                                Expanded(
+                                  flex: 1,
+                                  child: SizedBox(),
+                                ),
+                                Expanded(
+                                  flex: 2,
+                                  child: SizedBox(),
+                                )
+                              ],
                             ),
-                          ),
-                        ],
+                          );
+                        },
                       ),
                     ),
+                /*Container(
+                    padding: EdgeInsets.only(left: 15, right: 15),
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(width: 0, color: Colors.white)),
+                    child: SizedBox()),*/
                 childCount: 1),
           ),
           SliverFillRemaining(
@@ -146,13 +167,17 @@ class Outfit extends StatelessWidget {
             child: Column(
               children: [
                 Expanded(
-                    child: Container(
-                        decoration: BoxDecoration(
-                            color: Colors.white,
-                            border: Border.all(
-                                width: 0,
-                                color: Colors.white,
-                                style: BorderStyle.none))))
+                  child: Container(
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(
+                          width: 0,
+                          color: Colors.white,
+                          style: BorderStyle.none),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -189,9 +214,9 @@ class ArticleListFormField extends FormField<List<ArticleModel>> {
                         }));
                         List<ArticleModel> _articles = [];
                         wardrobeModel.articles?.forEach((article) {
-                          for(var stringId in selectedIds){
+                          for (var stringId in selectedIds) {
                             int _id = int.parse(stringId);
-                            if(article.id == _id){
+                            if (article.id == _id) {
                               _articles.add(article);
                             }
                           }
@@ -220,8 +245,8 @@ class NuovoOutfit extends StatelessWidget {
 
   static void _saveImage() {
     log("IN IMAGE");
-    String newPath =
-        join(utils.docsDir.path, '${myOutfitsModel.currentOutfit?.id}.jpg');
+    String newPath = join(utils.docsDir.path, 'outfits',
+        '${myOutfitsModel.currentOutfit?.id}.jpg');
     imageFile?.saveTo(newPath);
     log(newPath);
   }
@@ -253,6 +278,7 @@ class NuovoOutfit extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.lightBlueAccent,
       appBar: AppBar(
         title: Text("Nuovo Outfit"),
         elevation: 0,
@@ -437,9 +463,10 @@ class NuovoOutfit extends StatelessWidget {
                             SizedBox(height: 30),
                             ArticleListFormField(
                               context: context,
-                              onSaved: (articles){
+                              onSaved: (articles) {
                                 log(articles.toString());
-                                myOutfitsModel.currentOutfit?.articles = articles;
+                                myOutfitsModel.currentOutfit?.articles =
+                                    articles;
                               },
                             ),
                             SizedBox(height: 30),
@@ -547,43 +574,5 @@ class SelezioneArticoli extends StatelessWidget {
         },
       ),
     );
-  }
-}
-
-class FullScreenImage extends StatelessWidget {
-  const FullScreenImage({
-    Key? key,
-    required this.imageUrl,
-    required this.tag,
-  }) : super(key: key);
-
-  final String imageUrl;
-  final String tag;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-        color: Colors.blueGrey,
-        child: SafeArea(
-          child: Stack(
-            children: [
-              Center(
-                  child: Hero(
-                tag: tag,
-                child: Image.network(imageUrl),
-              )),
-              Material(
-                child: InkWell(
-                  child: Icon(
-                    Icons.close,
-                    size: 48,
-                  ),
-                  onTap: () => {Navigator.pop(context)},
-                ),
-                color: Colors.transparent,
-              ),
-            ],
-          ),
-        ));
   }
 }

@@ -60,7 +60,7 @@ class OutfitDBWorker {
     return _db;
   }
 
-  static ArticleModel articleFromMap(Map<String,dynamic> ?map) {
+  ArticleModel articleFromMap(Map<String,dynamic> ?map) {
     ArticleModel article = ArticleModel(
         id: map!['idArticle'] as int,
         idUser: map['idUser'] as int,
@@ -91,12 +91,9 @@ class OutfitDBWorker {
         dressCode: DressCode.values[map['dressCode']],
         likes: map['likes'],
         addedOn: DateTime.fromMillisecondsSinceEpoch(
-            ((map['addedOn'] as double).toInt() * 1000).toInt()),
+            ((map['addedOn']).toInt() * 1000).toInt()),
         favorite: map['favorite'] == 0 ? false : true);
 
-
-/*    Map res = {};
-    res[key] = outfit;*/
     log(outfit.toString());
     return outfit;
   }
@@ -106,11 +103,11 @@ class OutfitDBWorker {
     map['idOutfit'] = outfit.id;
     map['idUser'] = idUser;
     map['imgPath'] = outfit.imgPath;
-    map['dressCode'] = outfit.dressCode;
-    map['addedOn'] = outfit.addedOn;
-    map['favorite'] = outfit.favorite;
+    map['dressCode'] = outfit.dressCode?.index;
+    map['addedOn'] = (outfit.addedOn?.millisecondsSinceEpoch)!/1000;
+    map['favorite'] = outfit.favorite == true ? 1 : 0;
     map['likes'] = outfit.likes;
-    map['season'] = outfit.season;
+    map['season'] = outfit.season?.index;
 
     return map;
   }
@@ -121,7 +118,7 @@ class OutfitDBWorker {
     var val = await _db?.rawQuery('SELECT MAX(idOutfit)+1 AS id from outfits');
     int nextId = val?.first['id'] == null ? 1 : val!.first['id'] as int;
     outfit.id = nextId;
-    outfit.imgPath = join(utils.docsDir.path, '${outfit.id}.jpg');
+    outfit.imgPath = join(utils.docsDir.path,'outfits', '${outfit.id}.jpg');
 
     outfit.articles?.forEach((article) async {
       await _db?.rawInsert(
@@ -166,11 +163,10 @@ class OutfitDBWorker {
       log(element.toString());
       map.putIfAbsent(element['idOutfit'].toString(), () => []);
       (map[element['idOutfit'].toString()] as List).add(element);
-      log(map[element['idOutfit'].toString()].toString());
     });
     List<OutfitModel> list = [];
     map.forEach( (key, value) => list.add(outfitFromMap(key, value)) );
-    log(recs.toString());
+    log(list.toString());
     return list;
   }
 

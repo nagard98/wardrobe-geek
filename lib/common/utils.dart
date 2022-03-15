@@ -1,14 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:backdrop/backdrop.dart';
-import '../screens/profile.dart';
-import 'package:image_picker/image_picker.dart';
-import '../screens/article.dart';
-import 'package:animations/animations.dart';
-import 'package:provider/provider.dart';
-import '../main.dart';
-import 'dart:developer';
+import 'package:shimmer/shimmer.dart';
 
 late Directory docsDir;
 
@@ -28,7 +20,14 @@ class CardExtended extends StatelessWidget{
   }
 }
 
+Widget buildCardShimmer() => Shimmer.fromColors(
+    child: const Card(),
+    baseColor: const Color(0xFFE3E1E1),
+    highlightColor: const Color(0xFFEFEFEF));
+
 class CardItem extends StatelessWidget{
+  const CardItem({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -64,105 +63,40 @@ class CardItem extends StatelessWidget{
 
 }
 
-List<CardItem> allItems = [CardItem(),CardItem(),CardItem(),CardItem(),CardItem()];
+class FullScreenImage extends StatelessWidget {
+  FullScreenImage({
+    Key? key,
+    required this.image,
+    required this.tag,
+  }) : super(key: key);
 
-class WidgetOptions{
-  PreferredSizeWidget _appBar = AppBar();
-  Widget _frontLayer = Container();
-  Widget _backLayer = Container();
-  BorderRadius _frontLayerBorderRadius = BorderRadius.circular(0);
-  Widget _subheader = BackdropSubHeader(title: Text(""),);
-  Widget _floatingActionButton = FloatingActionButton(onPressed: (){});
-
-  WidgetOptions(appBar, frontLayer, backLayer, frontLayerBorderRadius, subheader, floatingActionButton){
-    _appBar = appBar;
-    _frontLayer = frontLayer;
-    _backLayer = backLayer;
-    _frontLayerBorderRadius = frontLayerBorderRadius;
-    _subheader = subheader;
-    _floatingActionButton = floatingActionButton;
-  }
-
-  PreferredSizeWidget getAppBar(){ return _appBar; }
-  Widget getFrontLayer(){ return _frontLayer; }
-  Widget getBackLayer(){ return _backLayer; }
-  BorderRadius getFrontLayerBorderRadius(){ return _frontLayerBorderRadius; }
-  Widget getSubheader(){ return _subheader; }
-  Widget getFloatingActionButton(){ return _floatingActionButton; }
-}
-
-
-class MyAppBar extends StatelessWidget implements PreferredSizeWidget{
-  final AnimationController animationController;
-  final String screenTitle;
-  final List<Widget> actionList ;
-  const MyAppBar({required this.screenTitle, required this.actionList, required this.animationController});
-
-
-/*  @override
-  void initState() {
-    super.initState();
-    animationController = AnimationController(
-      vsync: this,
-      duration: Duration(milliseconds: 500),
-    );
-  }*/
-
-  void repeatOnce() async {
-    await animationController.forward();
-    await animationController.reverse();
-  }
-
-/*
-  @override
-  void dispose() {
-    animationController.dispose();
-    super.dispose();
-  }
-*/
+  final File image;
+  final String tag;
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<BaseModel>(
-      builder: (context,base,child) {
-        log("Inside App Bar");
-        return AppBar(
-            title: Text('asd${base.selIndex}'),
-            elevation: 0,
-            actions: [IconButton(onPressed: () {
-
-            }, icon: Icon(Icons.settings))]
-        );
-      }
-    );
-  }
-
-  @override
-  Size get preferredSize => Size.fromHeight(kToolbarHeight);
-}
-
-
-
-class MyFAB extends StatelessWidget {
-  final VoidCallback? onPressed;
-  final Icon? icon;
-
-  Widget standard(BuildContext context){
-    return NuovoArticolo();
-  }
-
-  MyFAB({
-    required this.onPressed,
-    required this.icon
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return FloatingActionButton(
-        onPressed: (){
-          Navigator.push(context, MaterialPageRoute(builder: (context){ return standard(context); } ));
-        },
-        child: icon,
-    );
+    return Container(
+        color: Colors.blueGrey,
+        child: SafeArea(
+          child: Stack(
+            children: [
+              Center(
+                  child: Hero(
+                    tag: tag,
+                    child: Image.file(image),
+                  )),
+              Material(
+                child: InkWell(
+                  child: Icon(
+                    Icons.close,
+                    size: 48,
+                  ),
+                  onTap: () => {Navigator.pop(context)},
+                ),
+                color: Colors.transparent,
+              ),
+            ],
+          ),
+        ));
   }
 }

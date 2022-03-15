@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 
-class ProfileModel {
+class ProfileModel extends ChangeNotifier{
   String username;
   int? id;
   String? nome;
@@ -25,4 +25,4 @@ class ProfileModel {
       this.profilePicture});
 }
 
-ProfileModel profile = ProfileModel(username: "test", id: 1);
+ProfileModel profile = ProfileModel(username: "Naagard", id: 1);

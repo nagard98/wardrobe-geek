@@ -21,14 +21,20 @@ class WardrobeModel extends ChangeNotifier {
     throw UnimplementedError();
   }
 
-  bool removeArticle() {
-    //TODO: implementa rimozione articoo
-    throw UnimplementedError();
+  void updateArticle(ArticleDBWorker articleDBWorker, ArticleModel articleModel, ProfileModel profile,
+      {bool withReload = true}) async{
+    await articleDBWorker.update(articleModel, profile.id!);
+    if(withReload) loadArticles(articleDBWorker, profile);
+  }
+
+  void removeArticle(ArticleDBWorker articleDBWorker, int idArticle ,ProfileModel profile) async{
+    await articleDBWorker.delete(idArticle);
+    loadArticles(articleDBWorker, profile);
   }
 
   void loadArticles(ArticleDBWorker articleDBWorker, ProfileModel profile) async {
     isLoading = true;
-    await Future.delayed(Duration(seconds: 1), () {});
+    await Future.delayed(Duration(milliseconds: 500), () {});
     articles = (await articleDBWorker.getAll(profile.id as int))?.cast<ArticleModel>();
     isLoading = false;
     log(isLoading.toString());

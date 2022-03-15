@@ -70,7 +70,7 @@ class ArticleDBWorker {
     map['secColor'] = article.secondaryColor?.value;
     map['brand'] = article.brand!.index;
     map['clothingType'] = article.clothingType!.index;
-    map['fav'] = article.favorite as int;
+    map['fav'] = article.favorite! ? 1 : 0;
 
     return map;
   }
@@ -82,7 +82,7 @@ class ArticleDBWorker {
         await _db?.rawQuery('SELECT MAX(idArticle)+1 AS id from articles');
     int nextId = val?.first['id'] == null ? 1 : val!.first['id'] as int;
     article.id = nextId;
-    article.imgPath = join(utils.docsDir.path,'${article.id}.jpg');
+    article.imgPath = join(utils.docsDir.path,'articles','${article.id}.jpg');
 
     return await _db?.rawInsert(
         'INSERT INTO articles (idArticle, idUser, imgPath, articleName, primColor, secColor, brand, clothingType, fav)'

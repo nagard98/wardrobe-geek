@@ -1,11 +1,32 @@
 import 'dart:io';
-
+import 'package:esempio/db/outfit_db_worker.dart';
+import 'package:esempio/models/outfit_model.dart';
+import 'package:esempio/screens/outfit.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:backdrop/backdrop.dart';
-import '../common/utils.dart' as utils;
-import 'package:shimmer/shimmer.dart';
-import 'package:path/path.dart';
+import '../common/utils.dart';
+import 'package:provider/provider.dart';
+import 'package:esempio/models/explore_model.dart';
+import 'package:esempio/models/profile_model.dart';
+
+class Explore extends StatelessWidget {
+  const Explore({Key? key, required this.controller}) : super(key: key);
+
+  final AnimationController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider<ExploreModel>.value(
+      value: exploreModel,
+      child: BackdropScaffold(
+        stickyFrontLayer: true,
+        appBar: ExploreAppBar(),
+        frontLayer: ExploreFrontLayer(controller: controller),
+        backLayer: ExploreBackLayer(),
+      ),
+    );
+  }
+}
 
 class ExploreAppBar extends BackdropAppBar {
   @override
@@ -40,6 +61,11 @@ class ExploreBackLayer extends StatelessWidget {
 }
 
 class ExploreFrontLayer extends StatefulWidget {
+  const ExploreFrontLayer({Key? key, required this.controller})
+      : super(key: key);
+
+  final AnimationController controller;
+
   @override
   State<StatefulWidget> createState() {
     return ExploreFrontLayerState();
@@ -47,77 +73,87 @@ class ExploreFrontLayer extends StatefulWidget {
 }
 
 class ExploreFrontLayerState extends State<ExploreFrontLayer> {
-  Widget buildCardShimmer() => Shimmer.fromColors(
-      child: Card(),
-      baseColor: Color(0xFFC4C3C3),
-      highlightColor: Color(0xFFEFEFEF));
-
-  Widget buildCard(utils.CardItem card) => card;
-  List<utils.CardItem> items = [];
-  bool isLoading = false;
+  late Animation<double> _animationScale;
+  late Animation<double> _animationOpacity;
 
   @override
   void initState() {
     super.initState();
-    loadData();
+    _animationScale = Tween(begin: 0.6, end: 1.0).animate(widget.controller);
+    _animationOpacity = Tween(begin: 0.3, end: 1.0).animate(widget.controller);
+    exploreModel.loadData(OutfitDBWorker.outfitDBWorker, profile);
   }
 
-  Future loadData() async {
-    setState(() => isLoading = true);
-
-    await Future.delayed(Duration(seconds: 1), () {});
-    items = List.of(utils.allItems);
-    if (mounted) setState(() => isLoading = false);
+  @override
+  void dispose() {
+    widget.controller.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20), topRight: Radius.circular(20)),
-      ),
-      child: Stack(
-        children: [
-          Container(
-            margin: const EdgeInsets.only(top: 52),
-            child: ListView(
-              children: [
-                Column(
-                  children: [
-                    HorizontalMoreList(
-                      title: "Consigliati per Te",
-                    ),
-                    const SizedBox(
-                      height: 30,
-                    ),
-                    HorizontalMoreList(
-                      title: "Nuovi di Tendenza",
-                    ),
-                    const SizedBox(
-                      height: 30,
-                    ),
-                    HorizontalMoreList(
-                      title: "I Più Popolari",
-                    ),
-                    const SizedBox(
-                      height: 30,
-                    ),
-                    HorizontalMoreList(
-                      title: "I Migliori Designer",
-                      cardShape: CircleBorder(),
-                      itemHeight: 150,
-                    ),
-                  ],
-                ),
-              ],
-            ),
+    return FadeTransition(
+      opacity: CurvedAnimation(
+          curve: Curves.easeInOutCubic, parent: _animationOpacity),
+      child: ScaleTransition(
+        scale: CurvedAnimation(
+            curve: Curves.easeInOutCubic, parent: _animationScale),
+        child: Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(16), topRight: Radius.circular(16)),
           ),
-          BackdropSubHeader(
-            title: Text("Titolo"),
+          child: Consumer<ExploreModel>(
+            builder: (context, explore, child) {
+              return Stack(
+                children: [
+                  Container(
+                    margin: const EdgeInsets.only(top: 52),
+                    child: ListView(
+                      children: [
+                        Column(
+                          children: [
+                            HorizontalMoreList(
+                              explore: explore,
+                              title: "Consigliati per Te",
+                            ),
+                            const SizedBox(
+                              height: 30,
+                            ),
+                            HorizontalMoreList(
+                              explore: explore,
+                              title: "Nuovi di Tendenza",
+                            ),
+                            const SizedBox(
+                              height: 30,
+                            ),
+                            HorizontalMoreList(
+                              explore: explore,
+                              title: "I Più Popolari",
+                            ),
+                            const SizedBox(
+                              height: 30,
+                            ),
+                            HorizontalMoreList(
+                              explore: explore,
+                              title: "I Migliori Designer",
+                              cardShape: CircleBorder(),
+                              itemHeight: 150,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  BackdropSubHeader(
+                    title: Text("Titolo"),
+                  ),
+                ],
+              );
+            },
           ),
-        ],
+        ),
       ),
     );
   }
@@ -127,20 +163,17 @@ class HorizontalMoreList extends StatelessWidget {
   HorizontalMoreList(
       {Key? key,
       this.title = 'Title',
+      this.explore,
       this.itemHeight = 250,
       this.cardShape = const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(4)))})
       : super(key: key);
 
-  Widget buildCardShimmer() => Shimmer.fromColors(
-      child: Card(),
-      baseColor: Color(0xFFC4C3C3),
-      highlightColor: Color(0xFFEFEFEF));
-
   final bool isLoading = false;
   double itemHeight;
   ShapeBorder cardShape;
   String title;
+  ExploreModel? explore;
 
   @override
   Widget build(BuildContext context) {
@@ -169,20 +202,34 @@ class HorizontalMoreList extends StatelessWidget {
               mainAxisSpacing: 8,
             ),
             itemBuilder: (context, index) {
-              if (isLoading) {
+              if (explore!.isLoading) {
                 return buildCardShimmer();
               } else {
-                return Card(
-                  shape: cardShape,
-                  clipBehavior: Clip.hardEdge,
-                  child: Image.file(
-                    File(join(utils.docsDir.path, '2.jpg')),
-                    fit: BoxFit.cover,
+                return InkWell(
+                  child: Card(
+                    shape: cardShape,
+                    clipBehavior: Clip.hardEdge,
+                    child: Image.file(
+                      //TODO: implement dynamic loading
+                      File(explore?.reccomendedOutfits?[index].imgPath
+                          as String),
+                      fit: BoxFit.cover,
+                    ),
                   ),
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => Outfit(
+                            outfit: explore?.reccomendedOutfits
+                                ?.elementAt(index) as OutfitModel)));
+                  },
                 );
               }
             },
-            itemCount: 5,
+            itemCount: explore!.isLoading
+                ? 4
+                : (explore?.reccomendedOutfits?.length as int > 4
+                    ? 4
+                    : explore?.reccomendedOutfits?.length),
           ),
         ),
       ],

@@ -63,6 +63,9 @@ dev_dependencies:
   morpheus: ^1.2.3
   flutter_native_splash: ^2.1.0
   flutter_multi_select_items: ^0.2.1
+  modal_bottom_sheet: ^2.0.1
+  persistent_bottom_nav_bar_v2: ^4.1.3
+  flutter_staggered_animations: ^1.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

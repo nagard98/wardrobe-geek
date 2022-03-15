@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:backdrop/backdrop.dart';
 import '../common/utils.dart';
-import 'package:shimmer/shimmer.dart';
 
 
 class WishlistAppBar extends BackdropAppBar{
@@ -16,7 +14,6 @@ class WishlistAppBar extends BackdropAppBar{
       title: Text('Wishlist'),
     );
   }
-
 }
 
 class WishlistBackLayer extends StatelessWidget{
@@ -49,8 +46,6 @@ class WishlistFrontLayer extends StatefulWidget{
 }
 
 class WishlistFrontLayerState extends State<WishlistFrontLayer> {
-  Widget buildCardShimmer() => Shimmer.fromColors(child: Card(), baseColor: Color(0xFFC4C3C3), highlightColor: Color(0xFFEFEFEF));
-
   Widget buildCard(CardItem card) => card;
   List<CardItem> items = [];
   bool isLoading = false;
@@ -58,15 +53,6 @@ class WishlistFrontLayerState extends State<WishlistFrontLayer> {
   @override
   void initState() {
     super.initState();
-    loadData();
-  }
-
-  Future loadData() async {
-    setState(() => isLoading = true);
-
-    await Future.delayed(Duration(seconds: 1), () {});
-    items = List.of(allItems);
-    if(mounted) setState(() => isLoading = false);
   }
 
   @override
@@ -75,7 +61,7 @@ class WishlistFrontLayerState extends State<WishlistFrontLayer> {
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+            topLeft: Radius.circular(16), topRight: Radius.circular(16)),
       ),
       child: Stack(
         children: [

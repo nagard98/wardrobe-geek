@@ -1,6 +1,6 @@
 import 'dart:io' as io;
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:backdrop/backdrop.dart';
 import 'screens/explore.dart';
 import 'screens/profile.dart';
 import 'screens/my_outfits.dart';
@@ -8,18 +8,20 @@ import 'screens/wardrobe.dart';
 import 'screens/wishlist.dart';
 import 'common/utils.dart' as utils;
 import 'dart:developer';
-import 'package:animations/animations.dart';
 import 'package:provider/provider.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:auto_animated/auto_animated.dart';
+import 'package:path/path.dart';
+import 'package:persistent_bottom_nav_bar_v2/persistent-tab-view.dart';
 
 //TO-DO: Cambiare versione minima sdk
 
-void main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   io.Directory docsDir = await getApplicationDocumentsDirectory();
   utils.docsDir = docsDir;
-  runApp(const MyApp());
+  await io.Directory(join(docsDir.path, 'articles')).create();
+  await io.Directory(join(docsDir.path, 'outfits')).create();
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -29,16 +31,17 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider<BaseModel>(create: (BuildContext context) => BaseModel()),
-        ChangeNotifierProvider<BackdropModel>(create: (BuildContext context) => BackdropModel())
+        ChangeNotifierProvider<BaseModel>(
+            create: (BuildContext context) => BaseModel()),
+        ChangeNotifierProvider<BackdropModel>(
+            create: (BuildContext context) => BackdropModel())
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
-          // Define the default brightness and colors.
           brightness: Brightness.light,
-          primaryColor: Colors.pinkAccent,
-          appBarTheme: AppBarTheme(backgroundColor: Colors.pinkAccent),
+          primaryColor: Colors.lightBlueAccent,
+          appBarTheme: AppBarTheme(backgroundColor: Colors.lightBlueAccent),
 
           fontFamily: 'Montserrat',
 
@@ -58,10 +61,10 @@ class MyApp extends StatelessWidget {
 }
 
 class BaseModel extends ChangeNotifier {
-  int selIndex = 1;
+  int selIndex = 0;
 
   void increaseIndex() {
-    this.selIndex++;
+    selIndex++;
     notifyListeners();
   }
 
@@ -77,125 +80,82 @@ class BackdropModel extends ChangeNotifier {
   }
 }
 
-
-class BaseRoute extends StatefulWidget {
-  const BaseRoute({Key? key}) : super(key: key);
-
+class BaseRoute extends StatefulWidget{
   @override
-  State<BaseRoute> createState() => _BaseRouteState();
+  State<StatefulWidget> createState() {
+    return BaseRouteState();
+  }
+
 }
 
-class _BaseRouteState extends State<BaseRoute>{
-  late AnimationController animationController;
-  final frontLayers = [
-    WardrobeFrontLayer(),
-    MyOutfitsFrontLayer(),
-    ExploreFrontLayer(),
-    WishlistFrontLayer(),
-    ProfileFrontLayer()
-  ];
-  final backLayers = [
-    WardrobeBackLayer(),
-    MyOutfitsBackLayer(),
-    ExploreBackLayer(),
-    WishlistBackLayer(),
-    ProfileBackLayer()
-  ];
-  final appBars = <BackdropAppBar>[
-    WardrobeAppBar(),
-    MyOutfitsAppBar(),
-    ExploreAppBar(),
-    WishlistAppBar(),
-    ProfileAppBar()
-  ];
+class BaseRouteState extends State<BaseRoute> with TickerProviderStateMixin{
 
-  final subHeaders = [
-    Container(child: BackdropSubHeader(title: Text("Title"))),
-    Container(child: BackdropSubHeader(title: Text("Tit"))),
-    Container(child: BackdropSubHeader(title: Text("Ttle"))),
-    Container(child: BackdropSubHeader(title: Text("Tite"))),
-    Container(child: BackdropSubHeader(title: Text("Titl"))),
-  ];
-
-  final titles = ['Wardrobe', 'MyOutfits', 'Esplora', 'WishList', 'Profilo'];
+  late AnimationController controller;
+  late List<Widget> screens;
 
   @override
+  void initState(){
+    controller = AnimationController(vsync: this, duration: Duration(milliseconds: 350));
+    screens = [Wardrobe(controller: controller,), MyOutfits(controller: controller,), Explore(controller: controller,), Profile(controller: controller,)];
+    super.initState();
+  }
+
+  List<PersistentBottomNavBarItem> _navBarsItems() {
+    return [
+      PersistentBottomNavBarItem(
+        icon: Icon(Icons.home),
+        title: ("Wardrobe"),
+        activeColorPrimary: CupertinoColors.activeBlue,
+        inactiveColorPrimary: CupertinoColors.systemGrey,
+      ),
+      PersistentBottomNavBarItem(
+        icon: Icon(Icons.architecture),
+        title: ("MyOutfits"),
+        activeColorPrimary: CupertinoColors.activeBlue,
+        inactiveColorPrimary: CupertinoColors.systemGrey,
+      ),
+      PersistentBottomNavBarItem(
+        icon: Icon(Icons.explore),
+        title: ("Explore"),
+        activeColorPrimary: CupertinoColors.activeBlue,
+        inactiveColorPrimary: CupertinoColors.systemGrey,
+      ),
+      PersistentBottomNavBarItem(
+        icon: Icon(Icons.person),
+        title: ("Profile"),
+        activeColorPrimary: CupertinoColors.activeBlue,
+        inactiveColorPrimary: CupertinoColors.systemGrey,
+      ),
+    ];
+  }
+
   Widget build(BuildContext context) {
-    return BackdropScaffold(
-      frontLayerBackgroundColor: Colors.pink,
-      stickyFrontLayer: true,
-      appBar: PreferredSize(
-        child: Consumer<BaseModel>(
-            builder: (context, baseModel, child) {
-              log("Inside App Bar");
-              return appBars[baseModel.selIndex];
-            }
-        ),
-        preferredSize: Size.fromHeight(kToolbarHeight),
+    return PersistentTabView(
+      context,
+      screens: screens,
+      items: _navBarsItems(),
+      onItemSelected: (index){
+        log(index.toString());
+        controller.reset();
+        controller.forward();
+      },
+      confineInSafeArea: true,
+      backgroundColor: Colors.white,
+      handleAndroidBackButtonPress: true,
+      resizeToAvoidBottomInset: false,
+      stateManagement: false,
+      hideNavigationBarWhenKeyboardShows: false,
+      decoration: NavBarDecoration( colorBehindNavBar: Colors.white, ),
+      popAllScreensOnTapOfSelectedTab: true,
+      popActionScreens: PopActionScreensType.all,
+      itemAnimationProperties: const ItemAnimationProperties(
+        duration: Duration(milliseconds: 200),
+        curve: Curves.ease,
       ),
-      frontLayer: Consumer<BaseModel>(
-          builder: (context, baseModel, child) {
-            log("Inside front");
-            return PageTransitionSwitcher(
-                child: frontLayers[baseModel.selIndex],
-                duration: const Duration(milliseconds: 500),
-                transitionBuilder: (Widget child,
-                    Animation<double> animation,
-                    Animation<double> secondaryAnimation,) {
-                  return FadeThroughTransition(
-                    fillColor: Colors.pinkAccent,
-                    animation: animation,
-                    secondaryAnimation: secondaryAnimation,
-                    child: child,
-                  );
-                }
-            );
-          }
+      screenTransitionAnimation: const ScreenTransitionAnimation(
+        animateTabTransition: false,
       ),
-      backLayer: Consumer<BaseModel>(
-          builder: (context, baseModel, child) {
-            log("Inside back");
-            return backLayers[baseModel.selIndex];
-          }
-      ),
-      bottomNavigationBar: Builder(builder: (BuildContext context) {
-        return Consumer<BaseModel>(
-          builder: (context, baseModel, child){
-            log("Inside Bottom Nav");
-            return BottomNavigationBar(
-              backgroundColor: Colors.pinkAccent,
-              selectedItemColor: Colors.blue,
-              type: BottomNavigationBarType.fixed,
-              onTap: (index) {
-                Provider.of<BaseModel>(context,listen: false).setIndex(index);
-              },
-              currentIndex: Provider.of<BaseModel>(context,listen: false).selIndex,
-              items: const <BottomNavigationBarItem>[
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.home),
-                  label: "Wardrobe",
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.architecture),
-                  label: "MyOutfits",
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.explore),
-                  label: "Explore",
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.favorite),
-                  label: "Wishlist",
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.person),
-                  label: "Profile",
-                ),
-              ],
-            );
-          }
-        );
-      }),
+      navBarStyle: NavBarStyle.style3,
     );
   }
 }
