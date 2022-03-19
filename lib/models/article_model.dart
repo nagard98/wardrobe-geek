@@ -1,11 +1,14 @@
 import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
 
-enum Brand { armani, valentino, gucci, northFace, hollister, generico }
+/*enum Brand { armani, valentino, gucci, northFace, hollister, generico }
 
-enum ClothingType { tshirt, jeans, pantaloni, maglione, felpa, camicia, altro }
+enum ClothingType { tshirt, jeans, pantaloni, maglione, felpa, camicia, altro, sneakers, stivali, zeppe, giaccaVento }*/
+List<String> clothingNames = ['T-Shirt', 'Jeans', 'Pantaloni', 'Maglione', 'Felpa', 'Camicia', 'Altro', 'Sneakers', 'Stivali', 'Zeppe', 'Giacca A Vento'];
+Map<int,String>  clothing = clothingNames.asMap();
 
-enum ArticleColor { red, green, blue, yellow, pink, white, black }
+List<String> brandNames = ['Armani', 'Valentino', 'Gucci', 'The North Face', 'Hollister', 'Generico'];
+Map<int,String> brands = brandNames.asMap();
 
 final Map<ColorSwatch<Object>, String> customSwatches =
     <ColorSwatch<Object>, String>{
@@ -32,8 +35,8 @@ class ArticleModel {
   String? articleName;
   Color? primaryColor;
   Color? secondaryColor;
-  Brand? brand;
-  ClothingType? clothingType;
+  int? brand;
+  int? clothingType;
   bool? favorite;
 
   ArticleModel(

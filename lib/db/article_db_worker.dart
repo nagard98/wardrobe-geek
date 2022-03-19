@@ -1,9 +1,14 @@
+import 'dart:developer';
 import 'package:esempio/models/article_model.dart';
+import 'package:esempio/models/profile_model.dart';
 import 'package:esempio/models/wardrobe_model.dart';
 import 'package:esempio/common/utils.dart' as utils;
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:flutter/material.dart';
+import 'package:esempio/common/utils.dart';
+
+enum BooleanOp {and, or}
 
 class ArticleDBWorker {
   ArticleDBWorker._();
@@ -54,8 +59,8 @@ class ArticleDBWorker {
         imgPath: map['imgPath'] ?? "",
         primaryColor: Color(map['primColor'] as int),
         secondaryColor: Color(map['secColor'] as int),
-        brand: Brand.values[map['brand'] as int],
-        clothingType: ClothingType.values[map['clothingType'] as int] ,
+        brand: map['brand'] as int,
+        clothingType: map['clothingType'] as int ,
         favorite: map['fav'] == 0 ? false : true);
     return article;
   }
@@ -68,8 +73,8 @@ class ArticleDBWorker {
     map['articleName'] = article.articleName;
     map['primColor'] = article.primaryColor!.value;
     map['secColor'] = article.secondaryColor?.value;
-    map['brand'] = article.brand!.index;
-    map['clothingType'] = article.clothingType!.index;
+    map['brand'] = article.brand;
+    map['clothingType'] = article.clothingType;
     map['fav'] = article.favorite! ? 1 : 0;
 
     return map;
@@ -94,8 +99,8 @@ class ArticleDBWorker {
           article.articleName,
           article.primaryColor?.value,
           article.secondaryColor?.value,
-          article.brand?.index,
-          article.clothingType?.index,
+          article.brand,
+          article.clothingType,
           article.favorite
         ]);
   }
@@ -107,9 +112,51 @@ class ArticleDBWorker {
     return articleFromMap(rec?.first);
   }
 
-  Future<List<dynamic>?> getAll(int idUser) async {
+  String _buildCondition(Filter filter, List filterArgs, BooleanOp operator){
+    List conditions = [];
+    filterArgs.forEach((element) {
+      switch (filter){
+        case Filter.clothingType:
+          conditions.add("clothingType='$element'");
+          break;
+        case Filter.brand:
+          conditions.add("brand='$element'");
+          break;
+        case Filter.primColor:
+          conditions.add("primColor='$element'");
+          break;
+        case Filter.secColor:
+          conditions.add("secColor='$element'");
+          break;
+        case Filter.fav:
+          conditions.add("fav='$element'");
+      }
+    });
+    log(conditions.toString());
+    String op = operator==BooleanOp.and ? " AND " : " OR ";
+    return conditions.isEmpty ? "" : '(${conditions.join(op)})';
+
+  }
+
+  Future<List<dynamic>?> getAll(int idUser, {Map<Filter,List> filters=const {} } ) async {
     Database? db = await _getDB();
-    var recs = await _db?.query('articles',where: 'idUser=?', whereArgs: [idUser]);
+    List<Map<String, Object?>>? recs;
+    if(filters.isEmpty){
+      recs = await _db?.query('articles',where: 'idUser=?', whereArgs: [idUser]);
+    }else{
+      Map<Filter,String> stringedFilters = filters.map((key, value) => MapEntry(key,_buildCondition(key, value, BooleanOp.or)) );
+      log(stringedFilters.toString());
+      List cleanedFilters = stringedFilters.values.toList();
+
+      log("Before: $cleanedFilters");
+      cleanedFilters.removeWhere((element) => element=="");
+      cleanedFilters.add("idUser='${idUser}'");
+      log("After: $cleanedFilters");
+
+      recs = await _db?.rawQuery('SELECT * FROM articles '
+          'WHERE ${cleanedFilters.join(" AND ")}');
+
+    }
     var list = recs == null ? [] : recs.map((m) => articleFromMap(m)).toList();
     return list;
   }

@@ -3,13 +3,11 @@ import 'dart:developer';
 import 'package:esempio/models/article_model.dart';
 import 'package:esempio/models/outfit_model.dart';
 import 'package:esempio/models/wardrobe_model.dart';
-import 'package:esempio/common/utils.dart' as utils;
+import 'package:esempio/common/utils.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:flutter/material.dart';
 import 'package:esempio/db/article_db_worker.dart';
-import 'package:collection/collection.dart' as Coll;
-
 
 class Combo{
   var Outfit;
@@ -25,7 +23,7 @@ class OutfitDBWorker {
 
   Future<Database?> _getDB() async {
     if (_db == null) {
-      String path = join(utils.docsDir.path, "wardrobe_geek3.db");
+      String path = join(docsDir.path, "wardrobe_geek3.db");
       _db = await openDatabase(path, version: 1,
           onCreate: (Database inDB, int inVersion) async {
             //TODO: Aggiungere foreign key
@@ -68,8 +66,8 @@ class OutfitDBWorker {
         imgPath: map['artImg'] ?? "",
         primaryColor: Color(map['primColor'] as int),
         secondaryColor: Color(map['secColor'] as int),
-        brand: Brand.values[map['brand'] as int],
-        clothingType: ClothingType.values[map['clothingType'] as int] ,
+        brand: map['brand'] as int,
+        clothingType: map['clothingType'] as int ,
         favorite: map['fav'] == 0 ? false : true);
     return article;
   }
@@ -87,8 +85,8 @@ class OutfitDBWorker {
         idUser: map['idUser'],
         articles: articles,
         imgPath: map['otfImg'] ?? "",
-        season: Season.values[map['season']],
-        dressCode: DressCode.values[map['dressCode']],
+        season: map['season'] as int,
+        dressCode: map['dressCode'] as int,
         likes: map['likes'],
         addedOn: DateTime.fromMillisecondsSinceEpoch(
             ((map['addedOn']).toInt() * 1000).toInt()),
@@ -103,11 +101,11 @@ class OutfitDBWorker {
     map['idOutfit'] = outfit.id;
     map['idUser'] = idUser;
     map['imgPath'] = outfit.imgPath;
-    map['dressCode'] = outfit.dressCode?.index;
+    map['dressCode'] = outfit.dressCode;
     map['addedOn'] = (outfit.addedOn?.millisecondsSinceEpoch)!/1000;
     map['favorite'] = outfit.favorite == true ? 1 : 0;
     map['likes'] = outfit.likes;
-    map['season'] = outfit.season?.index;
+    map['season'] = outfit.season;
 
     return map;
   }
@@ -118,7 +116,7 @@ class OutfitDBWorker {
     var val = await _db?.rawQuery('SELECT MAX(idOutfit)+1 AS id from outfits');
     int nextId = val?.first['id'] == null ? 1 : val!.first['id'] as int;
     outfit.id = nextId;
-    outfit.imgPath = join(utils.docsDir.path,'outfits', '${outfit.id}.jpg');
+    outfit.imgPath = join(docsDir.path,'outfits', '${outfit.id}.jpg');
 
     outfit.articles?.forEach((article) async {
       await _db?.rawInsert(
@@ -134,14 +132,52 @@ class OutfitDBWorker {
           outfit.id,
           idUser,
           outfit.imgPath,
-          outfit.dressCode?.index,
+          outfit.dressCode,
           DateTime
               .now()
               .millisecondsSinceEpoch / 1000,
           outfit.favorite,
           outfit.likes,
-          outfit.season?.index,
+          outfit.season,
         ]);
+  }
+
+  String _buildCondition(Filter filter, List filterArgs, BooleanOp operator){
+    List conditions = [];
+    filterArgs.forEach((element) {
+      switch (filter){
+        case Filter.clothingType:
+          conditions.add("clothingType='$element'");
+          break;
+        case Filter.brand:
+          conditions.add("brand='$element'");
+          break;
+        case Filter.primColor:
+          conditions.add("primColor='$element'");
+          break;
+        case Filter.secColor:
+          conditions.add("secColor='$element'");
+          break;
+        case Filter.fav:
+          conditions.add("fav='$element'");
+          break;
+        case Filter.season:
+          conditions.add("season='$element'");
+          break;
+        case Filter.like:
+          conditions.add("like='$element'");
+          break;
+        case Filter.dressCode:
+          conditions.add("dressCode='$element'");
+          break;
+        case Filter.favorite:
+          conditions.add("favorite='$element'");
+          break;
+      }
+    });
+    log(conditions.toString());
+    String op = operator==BooleanOp.and ? " AND " : " OR ";
+    return conditions.isEmpty ? "" : '(${conditions.join(op)})';
   }
 
   Future<OutfitModel> get(int idOutfit) async {
@@ -152,11 +188,29 @@ class OutfitDBWorker {
     return OutfitModel();//outfitFromMap(rec?.first);
   }
 
-  Future<List<dynamic>?> getAll(int idUser) async {
+  Future<List<dynamic>?> getAll(int idUser, {Map<Filter,List> filters=const {} }) async {
     Database? db = await _getDB();
-    var recs = await _db?.rawQuery('SELECT outfits.idOutfit,outfits.idUser,articles.idArticle,outfits.imgPath as otfImg,season,likes,addedOn,favorite,dressCode,articles.imgPath as artImg,primColor,secColor,brand,clothingType,fav '
-        'FROM outfits,outfit_articles,articles '
-        'WHERE outfits.idUser=${idUser} AND outfits.idOutfit=outfit_articles.idOutfit AND articles.idArticle=outfit_articles.idArticle');
+    List<Map<String, Object?>>? recs;
+    String userIdCondition = idUser == -1 ? "" : "outfits.idUser='${idUser}'" ;
+
+    if (filters.isEmpty) {
+      recs = await _db?.rawQuery('SELECT outfits.idOutfit,outfits.idUser,articles.idArticle,outfits.imgPath as otfImg,season,likes,addedOn,favorite,dressCode,articles.imgPath as artImg,primColor,secColor,brand,clothingType,fav '
+          'FROM outfits,outfit_articles,articles '
+          'WHERE ${userIdCondition} ${userIdCondition.isEmpty ? "" : "AND"} outfits.idOutfit=outfit_articles.idOutfit AND articles.idArticle=outfit_articles.idArticle');
+    }else{
+      Map<Filter,String> stringedFilters = filters.map((key, value) => MapEntry(key,_buildCondition(key, value, BooleanOp.or)) );
+      log(stringedFilters.toString());
+      List cleanedFilters = stringedFilters.values.toList();
+
+      log("Before: $cleanedFilters");
+      cleanedFilters.removeWhere((element) => element=="");
+      cleanedFilters.add(userIdCondition);
+      log("After: $cleanedFilters");
+
+      recs = await _db?.rawQuery('SELECT outfits.idOutfit,outfits.idUser,articles.idArticle,outfits.imgPath as otfImg,season,likes,addedOn,favorite,dressCode,articles.imgPath as artImg,primColor,secColor,brand,clothingType,fav '
+          'FROM outfits,outfit_articles,articles '
+          'WHERE ${cleanedFilters.join(" AND ")} ${userIdCondition.isEmpty ? "" : "AND"} outfits.idOutfit=outfit_articles.idOutfit AND articles.idArticle=outfit_articles.idArticle');
+    }
 
     Map<String,dynamic> map = {};
     recs?.forEach((element) {

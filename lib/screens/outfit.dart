@@ -11,6 +11,8 @@ import 'package:path/path.dart';
 import 'package:esempio/models/profile_model.dart';
 import 'package:flutter_multi_select_items/flutter_multi_select_items.dart';
 import 'package:esempio/models/article_model.dart';
+import 'package:persistent_bottom_nav_bar_v2/persistent-tab-view.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 
 class Outfit extends StatelessWidget {
   final int heroIndex;
@@ -22,10 +24,11 @@ class Outfit extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.lightBlueAccent,
+      backgroundColor: Color(0xFF425C5A),
       body: CustomScrollView(
         slivers: [
           const SliverAppBar(
+            foregroundColor: Color(0xFFFDCDA2),
             title: Text("Nome Outfit"),
             pinned: true,
             snap: false,
@@ -47,7 +50,7 @@ class Outfit extends StatelessWidget {
                   Container(
                     decoration: BoxDecoration(
                         color: Colors.white,
-                        border: Border.all(width: 0,style: BorderStyle.none, color: Colors.lightBlueAccent),
+                        border: Border.all(width: 0,style: BorderStyle.none, color: Color(0xFF425C5A)),
                         borderRadius: BorderRadius.only(
                             topLeft: Radius.circular(20),
                             topRight: Radius.circular(20))),
@@ -82,12 +85,15 @@ class Outfit extends StatelessWidget {
                               ),
                             ),
                             onTap: () {
-                              Navigator.push(context,
-                                  MaterialPageRoute(builder: (_) {
-                                return utils.FullScreenImage(
-                                    image: File(outfit.imgPath.toString()),
-                                    tag: "outfit${outfit.id}");
-                              }));
+                              pushDynamicScreen(
+                                context,
+                                screen: MaterialPageRoute(builder: (_) {
+                                  return utils.FullScreenImage(
+                                      image: File(outfit.imgPath.toString()),
+                                      tag: "outfit${outfit.id}");
+                                }),
+                                withNavBar: false,
+                              );
                             },
                           ),
                         ),
@@ -97,9 +103,9 @@ class Outfit extends StatelessWidget {
                           flex: 8,
                           child: Column(
                             children: [
-                              Text("Stagione: ${outfit.season}"),
-                              Text("Dress Code: ${outfit.dressCode}"),
-                              Text("Designer: ${profile.username}")
+                              Text("Stagione: ${outfit.season}", style: TextStyle(color: Color(0xFFFDCDA2)),),
+                              Text("Dress Code: ${outfit.dressCode}", style: TextStyle(color: Color(0xFFFDCDA2))),
+                              Text("Designer: ${profile.username}", style: TextStyle(color: Color(0xFFFDCDA2)))
                             ],
                           ))
                     ],
@@ -124,7 +130,7 @@ class Outfit extends StatelessWidget {
                         ),
                         itemBuilder: (context, indexGrid) {
                           return Card(
-                            color: Colors.lightBlueAccent,
+                            color: Color(0xFF425C5A),
                             clipBehavior: Clip.hardEdge,
                             child: Row(
                               children: [
@@ -138,7 +144,7 @@ class Outfit extends StatelessWidget {
                                 ),
                                 Expanded(
                                   flex: 2,
-                                  child: Text(outfit.articles?[indexGrid].brand.toString() as String),
+                                  child: Text(outfit.articles?[indexGrid].brand.toString() as String, style: TextStyle(color: Color(0xFFFDCDA2))),
                                 ),
                                 Expanded(
                                   flex: 1,
@@ -231,16 +237,37 @@ class ArticleListFormField extends FormField<List<ArticleModel>> {
             });
 }
 
-class NuovoOutfit extends StatelessWidget {
+class NuovoOutfit extends StatefulWidget{
+  const NuovoOutfit({Key? key}) : super(key: key);
+
+  @override
+  State<StatefulWidget> createState() {
+    return NuovoOutfitState();
+  }
+
+}
+
+class NuovoOutfitState extends State<NuovoOutfit> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   static XFile? imageFile;
-
-  NuovoOutfit({Key? key}) : super(key: key);
 
   static Future chooseImage(ImageSource source) async {
     imageFile = await ImagePicker().pickImage(source: source);
     log(imageFile?.path ?? "");
     myOutfitsModel.currentOutfit!.imgPath = imageFile?.path;
+  }
+
+  List<DropdownMenuItem<int>> _dropDownFromMap(Map<int, String> map) {
+    List<DropdownMenuItem<int>> items = [];
+    map.forEach((key, value) {
+      items.add(
+        DropdownMenuItem<int>(
+          child: Text(value),
+          value: key,
+        ),
+      );
+    });
+    return items;
   }
 
   static void _saveImage() {
@@ -278,8 +305,9 @@ class NuovoOutfit extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.lightBlueAccent,
+      backgroundColor: Color(0xFF425C5A),
       appBar: AppBar(
+        foregroundColor: Color(0xFFFDCDA2),
         title: Text("Nuovo Outfit"),
         elevation: 0,
       ),
@@ -287,7 +315,7 @@ class NuovoOutfit extends StatelessWidget {
         key: _formKey,
         child: CustomScrollView(
           slivers: [
-            SliverList(
+            /*SliverList(
               delegate: SliverChildBuilderDelegate(
                 (context, index) => Stack(
                   alignment: Alignment.topLeft,
@@ -353,7 +381,7 @@ class NuovoOutfit extends StatelessWidget {
                 ),
                 childCount: 1,
               ),
-            ),
+            ),*/
             SliverList(
               delegate: SliverChildBuilderDelegate(
                   (context, index) => Container(
@@ -400,7 +428,62 @@ class NuovoOutfit extends StatelessWidget {
                               ),
                             ),
                             SizedBox(height: 20),
-                            DropdownButtonFormField(
+                            DropdownSearch<DropdownMenuItem<int>>(
+                              dropdownSearchDecoration: InputDecoration(
+                                  labelText: "Stagione",
+                                  labelStyle:
+                                  TextStyle(color: Color(0xFF425C5A)),
+                                  isDense: true,
+                                  focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                          color: Color(0xFFFDCDA2),
+                                          width: 2.0)),
+                                  contentPadding:
+                                  EdgeInsets.fromLTRB(10, 6, 10, 6),
+                                  enabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                          color: Color(0xFF425C5A)))),
+                              showSearchBox: true,
+                              mode: Mode.DIALOG,
+                              popupTitle: Text('Seleziona Stagione'),
+                              items: _dropDownFromMap(seasons),
+                              itemAsString: (item) =>
+                              (item?.child as Text).data as String,
+                              onSaved: (item) {
+                                myOutfitsModel.currentOutfit!.season =
+                                    item?.value;
+                              },
+                              onChanged: print,
+                            ),
+                            SizedBox(height: 20),
+                            DropdownSearch<DropdownMenuItem<int>>(
+                              dropdownSearchDecoration: InputDecoration(
+                                  labelText: "Dress Code",
+                                  labelStyle:
+                                  TextStyle(color: Color(0xFF425C5A)),
+                                  isDense: true,
+                                  focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                          color: Color(0xFFFDCDA2),
+                                          width: 2.0)),
+                                  contentPadding:
+                                  EdgeInsets.fromLTRB(10, 6, 10, 6),
+                                  enabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                          color: Color(0xFF425C5A)))),
+                              showSearchBox: true,
+                              mode: Mode.DIALOG,
+                              popupTitle: Text('Seleziona Dress Code'),
+                              items: _dropDownFromMap(dressCodes),
+                              itemAsString: (item) =>
+                              (item?.child as Text).data as String,
+                              onSaved: (item) {
+                                myOutfitsModel.currentOutfit!.dressCode =
+                                    item?.value;
+                              },
+                              onChanged: print,
+                            ),
+                            /*DropdownButtonFormField(
                               hint: Text("Stagione"),
                               isExpanded: true,
                               value: Season.estate.index.toString(),
@@ -459,7 +542,7 @@ class NuovoOutfit extends StatelessWidget {
                                     child: Text("Altro"),
                                     value: DressCode.altro.index.toString()),
                               ],
-                            ),
+                            ),*/
                             SizedBox(height: 30),
                             ArticleListFormField(
                               context: context,

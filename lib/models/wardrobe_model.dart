@@ -4,16 +4,21 @@ import 'package:provider/provider.dart';
 import 'package:esempio/db/article_db_worker.dart';
 import 'package:esempio/models/article_model.dart';
 import 'package:flutter/material.dart';
+import 'package:esempio/common/utils.dart';
 
 class WardrobeModel extends ChangeNotifier {
   List<ArticleModel>? articles = [];
   ArticleModel? currentArticle;
   bool isLoading = false;
   bool isEditing = false;
+  Map<Filter,List> filters = {};
 
-  List<ArticleModel> filter() {
-    //TODO: implementa filtro
-    throw UnimplementedError();
+  void filter(ArticleDBWorker articleDBWorker, ProfileModel profile) async{
+    isLoading = true;
+    await Future.delayed(Duration(milliseconds: 400), () {});
+    articles = (await articleDBWorker.getAll(profile.id as int, filters: filters))?.cast<ArticleModel>();
+    isLoading = false;
+    notifyListeners();
   }
 
   bool addArticle(ArticleModel article) {
@@ -37,7 +42,6 @@ class WardrobeModel extends ChangeNotifier {
     await Future.delayed(Duration(milliseconds: 500), () {});
     articles = (await articleDBWorker.getAll(profile.id as int))?.cast<ArticleModel>();
     isLoading = false;
-    log(isLoading.toString());
     notifyListeners();
   }
 }

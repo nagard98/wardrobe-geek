@@ -1,64 +1,26 @@
 import 'package:esempio/models/article_model.dart';
 import 'package:esempio/models/wardrobe_model.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:developer';
 import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:esempio/db/article_db_worker.dart';
 import 'package:esempio/models/profile_model.dart';
-import 'package:esempio/common/utils.dart' as utils;
+import 'package:esempio/common/utils.dart';
 import 'package:path/path.dart';
 import 'dart:io';
+import 'package:persistent_bottom_nav_bar_v2/persistent-tab-view.dart';
+import 'package:dropdown_search/dropdown_search.dart';
+import 'package:colornames/colornames.dart';
 
-class ColorFormField extends FormField<Color> {
-  ColorFormField(
-      {Key? key,
-      FormFieldSetter<Color>? onSaved,
-      FormFieldValidator<Color>? validator,
-      Color initialValue = Colors.white,
-      bool autovalidate = false})
-      : super(
-            key: key,
-            onSaved: onSaved,
-            restorationId: "ASD",
-            validator: validator,
-            initialValue: initialValue,
-            builder: (FormFieldState<Color> state) {
-              return TextField(
-                  readOnly: true,
-                  decoration: InputDecoration(hintText: state.value.toString()),
-                  onTap: () async {
-                    var inputCol = await showColorPickerDialog(
-                      state.context,
-                      state.value as Color,
-                      title: Text('ColorPicker',
-                          style: Theme.of(state.context).textTheme.headline6),
-                      showColorCode: true,
-                      colorCodeHasColor: true,
-                      pickersEnabled: <ColorPickerType, bool>{
-                        ColorPickerType.wheel: false,
-                        ColorPickerType.accent: false
-                      },
-                      actionButtons: const ColorPickerActionButtons(
-                        okButton: true,
-                        closeButton: true,
-                        dialogActionButtons: false,
-                      ),
-                    );
-                    state.didChange(inputCol);
-                    log(inputCol.toString());
-                  });
-            });
-}
-
-class NuovoArticolo extends StatefulWidget{
+class NuovoArticolo extends StatefulWidget {
   const NuovoArticolo({Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
     return NuovoArticoloState();
   }
-
 }
 
 class NuovoArticoloState extends State<NuovoArticolo> {
@@ -73,8 +35,8 @@ class NuovoArticoloState extends State<NuovoArticolo> {
 
   static void _saveImage() {
     log("IN IMAGE");
-    String newPath = join(utils.docsDir.path, 'articles',
-        '${wardrobeModel.currentArticle?.id}.jpg');
+    String newPath = join(
+        docsDir.path, 'articles', '${wardrobeModel.currentArticle?.id}.jpg');
     imageFile?.saveTo(newPath);
     log(newPath);
   }
@@ -100,10 +62,24 @@ class NuovoArticoloState extends State<NuovoArticolo> {
         const SnackBar(content: Text("Aggiunto articolo correttamente")));
   }
 
+  List<DropdownMenuItem<int>> _dropDownFromMap(Map<int, String> map) {
+    List<DropdownMenuItem<int>> items = [];
+    map.forEach((key, value) {
+      items.add(
+        DropdownMenuItem<int>(
+          child: Text(value),
+          value: key,
+        ),
+      );
+    });
+    return items;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        foregroundColor: const Color(0xFFFDCDA2),
         title: const Text("Nuovo Articolo"),
         elevation: 0,
       ),
@@ -137,35 +113,62 @@ class NuovoArticoloState extends State<NuovoArticolo> {
                       child: Container(
                         width: 250,
                         height: 250,
-                        child: Card(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              OutlinedButton(
-                                onPressed: () {
-                                  chooseImage(ImageSource.camera);
-                                },
-                                child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: const [
-                                      Icon(Icons.photo_camera),
-                                      Text("Fai Foto")
-                                    ]),
-                              ),
-                              Text("oppure"),
-                              OutlinedButton(
-                                onPressed: () {
-                                  chooseImage(ImageSource.gallery);
-                                },
-                                child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: const [
-                                      Icon(Icons.collections),
-                                      Text("Scegli da Galleria")
-                                    ]),
-                              )
-                            ],
-                          ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(4),
+                          boxShadow: [
+                            const BoxShadow(
+                              color: Color(0xFFDEDEDE),
+                            ),
+                            const BoxShadow(
+                              color: Color(0xFFF1F1F1),
+                              spreadRadius: -4.0,
+                              blurRadius: 8.0,
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            OutlinedButton(
+                              style: ButtonStyle(
+                                  backgroundColor:
+                                      MaterialStateProperty.all(Colors.white),
+                                  foregroundColor: MaterialStateProperty.all(
+                                      Color(0xFF76454E)),
+                                  overlayColor: MaterialStateProperty.all(
+                                      Color(0xFFFDCDA2))),
+                              onPressed: () {
+                                chooseImage(ImageSource.camera);
+                              },
+                              child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: const [
+                                    Icon(Icons.photo_camera),
+                                    Text("Fai Foto")
+                                  ]),
+                            ),
+                            Text("oppure"),
+                            OutlinedButton(
+                              style: ButtonStyle(
+                                  backgroundColor:
+                                      MaterialStateProperty.all(Colors.white),
+                                  foregroundColor: MaterialStateProperty.all(
+                                      Color(0xFF76454E)),
+                                  overlayColor: MaterialStateProperty.all(
+                                      Color(0xFFFDCDA2))),
+                              onPressed: () {
+                                chooseImage(ImageSource.gallery);
+                              },
+                              child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: const [
+                                    Icon(Icons.collections),
+                                    Text("Scegli da Galleria")
+                                  ]),
+                            )
+                          ],
                         ),
                       ),
                     ),
@@ -189,75 +192,103 @@ class NuovoArticoloState extends State<NuovoArticolo> {
                                 wardrobeModel.currentArticle!.articleName =
                                     input;
                               },
+                              cursorColor: Color(0xFFA4626D),
                               decoration: InputDecoration(
-                                  labelText: 'Titolo Articolo',
-                                  enabledBorder: OutlineInputBorder(
-                                    borderSide: const BorderSide(
-                                        width: 2, color: Colors.blue),
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderSide: const BorderSide(
-                                        width: 2, color: Colors.white),
-                                    borderRadius: BorderRadius.circular(10),
-                                  )),
+                                //hintText: 'Titolo Articolo',
+                                labelText: 'Titolo Articolo',
+                                labelStyle: TextStyle(color: Color(0xFF425C5A)),
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide:
+                                      BorderSide(color: Color(0xFF425C5A)),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: Color(0xFFFDCDA2), width: 2.0)),
+                              ),
                             ),
                             SizedBox(height: 20),
-                            DropdownButtonFormField(
+                            DropdownSearch<DropdownMenuItem<int>>(
+                              dropdownSearchDecoration: InputDecoration(
+                                  labelText: "Brand",
+                                  labelStyle:
+                                      TextStyle(color: Color(0xFF425C5A)),
+                                  isDense: true,
+                                  focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                          color: Color(0xFFFDCDA2),
+                                          width: 2.0)),
+                                  contentPadding:
+                                      EdgeInsets.fromLTRB(10, 6, 10, 6),
+                                  enabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                          color: Color(0xFF425C5A)))),
+                              showSearchBox: true,
+                              mode: Mode.DIALOG,
+                              popupTitle: Text('Seleziona Brand'),
+                              items: _dropDownFromMap(brands),
+                              itemAsString: (item) =>
+                                  (item?.child as Text).data as String,
+                              onSaved: (item) {
+                                wardrobeModel.currentArticle!.brand =
+                                    item?.value;
+                              },
+                              onChanged: print,
+                            ),
+                            SizedBox(height: 20),
+                            DropdownSearch<DropdownMenuItem<int>>(
+                              dropdownSearchDecoration: InputDecoration(
+                                  labelText: "Tipo Capo",
+                                  labelStyle:
+                                      TextStyle(color: Color(0xFF425C5A)),
+                                  isDense: true,
+                                  focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                          color: Color(0xFFFDCDA2),
+                                          width: 2.0)),
+                                  contentPadding:
+                                      EdgeInsets.fromLTRB(10, 6, 10, 6),
+                                  enabledBorder: OutlineInputBorder(
+                                      gapPadding: 2.0,
+                                      borderSide: BorderSide(
+                                          color: Color(0xFF425C5A)))),
+                              showSearchBox: true,
+                              mode: Mode.DIALOG,
+                              popupTitle: Text('Seleziona Tipo Capo'),
+                              items: _dropDownFromMap(clothing),
+                              itemAsString: (item) =>
+                                  (item?.child as Text).data as String,
+                              onSaved: (item) {
+                                wardrobeModel.currentArticle!.clothingType =
+                                    item?.value;
+                              },
+                              onChanged: print,
+                            ),
+/*                            DropdownButtonFormField<int>(
                               hint: Text("Brand"),
                               isExpanded: true,
-                              value: Brand.armani.index.toString(),
+                              value: 0,
                               onSaved: (input) {
-                                wardrobeModel.currentArticle!.brand =
-                                    Brand.values[int.parse(input as String)];
+                                wardrobeModel.currentArticle!.brand = input;
                               },
-                              onChanged: (String? newValue) {},
-                              items: [
-                                DropdownMenuItem(
-                                    child: Text("Armani"),
-                                    value: Brand.armani.index.toString()),
-                                DropdownMenuItem(
-                                    child: Text("Gucci"),
-                                    value: Brand.gucci.index.toString()),
-                                DropdownMenuItem(
-                                    child: Text("Valentino"),
-                                    value: Brand.valentino.index.toString()),
-                                DropdownMenuItem(
-                                    child: Text("Generico"),
-                                    value: Brand.generico.index.toString()),
-                              ],
+                              onChanged: (newValue) {},
+                              items: _dropDownFromMap(brands),
                             ),
                             SizedBox(height: 20),
-                            DropdownButtonFormField(
-                              hint: Text("Tipo"),
-                              isExpanded: true,
-                              value: ClothingType.tshirt.index.toString(),
-                              onSaved: (input) {
-                                wardrobeModel.currentArticle!.clothingType =
-                                    ClothingType
-                                        .values[int.parse(input as String)];
-                              },
-                              onChanged: (String? newValue) {},
-                              items: [
-                                DropdownMenuItem(
-                                    child: Text("T-Shirt"),
-                                    value:
-                                        ClothingType.tshirt.index.toString()),
-                                DropdownMenuItem(
-                                    child: Text("Felpa"),
-                                    value: ClothingType.felpa.index.toString()),
-                                DropdownMenuItem(
-                                    child: Text("Maglione"),
-                                    value:
-                                        ClothingType.maglione.index.toString()),
-                                DropdownMenuItem(
-                                    child: Text("Altro"),
-                                    value: ClothingType.altro.index.toString()),
-                              ],
-                            ),
-                            SizedBox(height: 20),
+                            DropdownButtonFormField<int>(
+                                hint: Text("Tipo"),
+                                isExpanded: true,
+                                value: 0,
+                                onSaved: (input) {
+                                  wardrobeModel.currentArticle!.clothingType =
+                                      input;
+                                },
+                                onChanged: (newValue) {},
+                                items: _dropDownFromMap(clothing)),
+                            SizedBox(height: 20),*/
                             SizedBox(height: 20),
                             ColorFormField(
+                              text: "Colore Primario",
+                              textColor: Color(0xFF425C5A),
                               onSaved: (color) {
                                 log(color.toString());
                                 wardrobeModel.currentArticle!.primaryColor =
@@ -266,6 +297,8 @@ class NuovoArticoloState extends State<NuovoArticolo> {
                             ),
                             SizedBox(height: 20),
                             ColorFormField(
+                              text: "Colore Secondario",
+                              textColor: Color(0xFF425C5A),
                               onSaved: (color) {
                                 log(color.toString());
                                 wardrobeModel.currentArticle!.secondaryColor =
@@ -280,7 +313,7 @@ class NuovoArticoloState extends State<NuovoArticolo> {
                                     style: ButtonStyle(
                                         backgroundColor:
                                             MaterialStateProperty.all(
-                                                Colors.green)),
+                                                Color(0xFFF39053))),
                                     child: Text("Salva Articolo"),
                                     onPressed: () {
                                       _save(context);
@@ -330,6 +363,7 @@ class Articolo extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
+        foregroundColor: const Color(0xFFFDCDA2),
         title: Text('${article.articleName}'),
         actions: [IconButton(onPressed: () {}, icon: const Icon(Icons.edit))],
       ),
@@ -360,10 +394,14 @@ class Articolo extends StatelessWidget {
                     margin: EdgeInsets.only(top: 40),
                     child: InkWell(
                       onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (_) {
-                          return utils.FullScreenImage(
-                              image: imageFile, tag: "articolo${article.id}");
-                        }));
+                        pushDynamicScreen(
+                          context,
+                          screen: MaterialPageRoute(builder: (_) {
+                            return FullScreenImage(
+                                image: imageFile, tag: "articolo${article.id}");
+                          }),
+                          withNavBar: false,
+                        );
                       },
                       child: Hero(
                         tag: "articolo${article.id}",
@@ -396,7 +434,6 @@ class Articolo extends StatelessWidget {
                       child: Column(
                         children: [
                           Container(
-                            margin: EdgeInsets.only(bottom: 30),
                             decoration: const BoxDecoration(
                                 border: Border(bottom: BorderSide(width: 0.4))),
                             child: Row(
@@ -406,12 +443,12 @@ class Articolo extends StatelessWidget {
                                   "Tipo Capo",
                                   style: TextStyle(fontWeight: FontWeight.bold),
                                 ),
-                                Text('${article.clothingType}')
+                                RawChip(label: Text('${clothing[article.clothingType]}'))
                               ],
                             ),
                           ),
+                          SizedBox(height: 10,),
                           Container(
-                            margin: EdgeInsets.only(bottom: 30),
                             decoration: const BoxDecoration(
                                 border: Border(bottom: BorderSide(width: 0.4))),
                             child: Row(
@@ -421,22 +458,38 @@ class Articolo extends StatelessWidget {
                                   "Brand",
                                   style: TextStyle(fontWeight: FontWeight.bold),
                                 ),
-                                Text('${article.brand}')
+                                RawChip(label: Text('${brands[article.brand]}'))
                               ],
                             ),
                           ),
+                          SizedBox(height: 10,),
                           Container(
-                            margin: EdgeInsets.only(bottom: 30),
                             decoration: const BoxDecoration(
                                 border: Border(bottom: BorderSide(width: 0.4))),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                const Text(
-                                  "Colore Primario",
-                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                Expanded(
+                                  flex: 2,
+                                  child: const Text(
+                                    "Colore Primario",
+                                    softWrap: true,
+                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                  ),
                                 ),
-                                Text('${article.primaryColor}')
+                                Expanded(
+                                  flex: 3,
+                                  child: Align(
+                                    alignment: Alignment.centerRight,
+                                    child: RawChip(
+                                      label: Text(
+                                          '${ColorNames.guess(article.primaryColor!)}', overflow: TextOverflow.fade),
+                                      avatar: CircleAvatar(
+                                        backgroundColor: article.primaryColor,
+                                      ),
+                                    ),
+                                  ),
+                                )
                               ],
                             ),
                           ),

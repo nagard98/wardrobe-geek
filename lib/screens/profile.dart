@@ -15,7 +15,7 @@ class Profile extends StatelessWidget {
     return ChangeNotifierProvider<ProfileModel>.value(
       value: profile,
       child: Scaffold(
-        backgroundColor: Colors.lightBlueAccent,
+        backgroundColor: const Color(0xFF425C5A),
         body: ProfileFrontLayer(controller: controller),
       ),
     );
@@ -66,7 +66,8 @@ class ProfileFrontLayerState extends State<ProfileFrontLayer> {
     return CustomScrollView(
       slivers: [
         SliverAppBar(
-          title: Text("Profilo"),
+          foregroundColor: const Color(0xFFFDCDA2),
+          title: const Text("Profilo"),
           actions: [
             IconButton(
                 onPressed: () {
@@ -97,9 +98,9 @@ class ProfileFrontLayerState extends State<ProfileFrontLayer> {
                         Container(
                           height: 185,
                           decoration: BoxDecoration(
-                              color: Colors.lightBlueAccent,
+                              color: Color(0xFF425C5A),
                               border: Border.all(
-                                  color: Colors.lightBlueAccent, width: 2)),
+                                  color: Color(0xFF425C5A), width: 2)),
                         ),
                         Container(
                           decoration: const BoxDecoration(
@@ -133,23 +134,20 @@ class ProfileFrontLayerState extends State<ProfileFrontLayer> {
                               Container(
                                 padding: EdgeInsets.all(20),
                                 decoration: BoxDecoration(
-                                    color: Colors.yellow,
+                                    color: Color(0xFFFDCDA2),
                                     border: Border.all(
-                                        color: Colors.yellow, width: 0),
+                                        color: Color(0xFFFDCDA2), width: 0),
                                     borderRadius: const BorderRadius.only(
                                         topLeft: Radius.circular(10),
                                         bottomLeft: Radius.circular(10))),
                                 child: Text("Followers"),
                               ),
-                              const VerticalDivider(
-                                width: 1,
-                              ),
                               Container(
                                 padding: EdgeInsets.all(20),
                                 decoration: BoxDecoration(
-                                    color: Colors.yellow,
+                                    color: Color(0xFFFDCDA2),
                                     border: Border.all(
-                                        color: Colors.yellow, width: 0),
+                                        color: Color(0xFFFDCDA2), width: 0),
                                     borderRadius: const BorderRadius.only(
                                         topRight: Radius.circular(10),
                                         bottomRight: Radius.circular(10))),
@@ -241,6 +239,10 @@ class ProfilePicture extends StatelessWidget {
                   return Container();
                 },
                 appearance: CircularSliderAppearance(
+                  customColors: CustomSliderColors(
+                    progressBarColor: Color(0xFFF39053),
+                    trackColor: Color(0xFFA4626D)
+                  ),
                   customWidths: CustomSliderWidths(progressBarWidth: 10),
                   size: 170,
                 ),

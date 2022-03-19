@@ -1,7 +1,9 @@
 import 'dart:io' as io;
+import 'package:esempio/models/article_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'screens/explore.dart';
+import 'package:flutter/services.dart';
+import 'screens/explore_home.dart';
 import 'screens/profile.dart';
 import 'screens/my_outfits.dart';
 import 'screens/wardrobe.dart';
@@ -21,6 +23,8 @@ void main() async {
   utils.docsDir = docsDir;
   await io.Directory(join(docsDir.path, 'articles')).create();
   await io.Directory(join(docsDir.path, 'outfits')).create();
+  SystemUiOverlayStyle mySystemTheme= SystemUiOverlayStyle.light.copyWith(systemNavigationBarColor: Colors.white);
+  SystemChrome.setSystemUIOverlayStyle(mySystemTheme);
   runApp(MyApp());
 }
 
@@ -40,18 +44,21 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           brightness: Brightness.light,
-          primaryColor: Colors.lightBlueAccent,
-          appBarTheme: AppBarTheme(backgroundColor: Colors.lightBlueAccent),
-
+          primaryColor: Color(0xFF425C5A),
+          appBarTheme: AppBarTheme(backgroundColor: Color(0xFF425C5A)),
           fontFamily: 'Montserrat',
+          //accentColor: Color(0xFFFF5963),
 
           textTheme: const TextTheme(
             headline1: TextStyle(
                 fontSize: 48.0,
                 fontWeight: FontWeight.bold,
                 color: Colors.pink),
-            headline6: TextStyle(fontSize: 26.0, fontWeight: FontWeight.w700),
+            headline6: TextStyle(fontSize: 26.0, fontWeight: FontWeight.w600),
             bodyText2: TextStyle(fontSize: 14.0, fontFamily: 'Hind'),
+          ).apply(
+            bodyColor: Color(0xFF425C5A),
+            displayColor: Color(0xFF425C5A),
           ),
         ),
         home: BaseRoute(),
@@ -92,9 +99,11 @@ class BaseRouteState extends State<BaseRoute> with TickerProviderStateMixin{
 
   late AnimationController controller;
   late List<Widget> screens;
+  late int lastNavIndex;
 
   @override
   void initState(){
+    lastNavIndex = 0;
     controller = AnimationController(vsync: this, duration: Duration(milliseconds: 350));
     screens = [Wardrobe(controller: controller,), MyOutfits(controller: controller,), Explore(controller: controller,), Profile(controller: controller,)];
     super.initState();
@@ -105,26 +114,26 @@ class BaseRouteState extends State<BaseRoute> with TickerProviderStateMixin{
       PersistentBottomNavBarItem(
         icon: Icon(Icons.home),
         title: ("Wardrobe"),
-        activeColorPrimary: CupertinoColors.activeBlue,
-        inactiveColorPrimary: CupertinoColors.systemGrey,
+        activeColorPrimary: Color(0xFFFDCDA2),
+        inactiveColorPrimary: Color(0xFF425C5A),
       ),
       PersistentBottomNavBarItem(
         icon: Icon(Icons.architecture),
         title: ("MyOutfits"),
-        activeColorPrimary: CupertinoColors.activeBlue,
-        inactiveColorPrimary: CupertinoColors.systemGrey,
+        activeColorPrimary: Color(0xFFFDCDA2),
+        inactiveColorPrimary: Color(0xFF425C5A),
       ),
       PersistentBottomNavBarItem(
         icon: Icon(Icons.explore),
         title: ("Explore"),
-        activeColorPrimary: CupertinoColors.activeBlue,
-        inactiveColorPrimary: CupertinoColors.systemGrey,
+        activeColorPrimary: Color(0xFFFDCDA2),
+        inactiveColorPrimary: Color(0xFF425C5A),
       ),
       PersistentBottomNavBarItem(
         icon: Icon(Icons.person),
         title: ("Profile"),
-        activeColorPrimary: CupertinoColors.activeBlue,
-        inactiveColorPrimary: CupertinoColors.systemGrey,
+        activeColorPrimary: Color(0xFFFDCDA2),
+        inactiveColorPrimary: Color(0xFF425C5A),
       ),
     ];
   }
@@ -135,16 +144,20 @@ class BaseRouteState extends State<BaseRoute> with TickerProviderStateMixin{
       screens: screens,
       items: _navBarsItems(),
       onItemSelected: (index){
-        log(index.toString());
-        controller.reset();
-        controller.forward();
+        log('Index Navigazione: ${index.toString()}');
+        if(lastNavIndex != index){
+          controller.reset();
+          controller.forward();
+        }
+        lastNavIndex = index;
+        log(clothing.toString());
+        //TODO: implementa return to top
       },
       confineInSafeArea: true,
-      backgroundColor: Colors.white,
       handleAndroidBackButtonPress: true,
-      resizeToAvoidBottomInset: false,
-      stateManagement: false,
-      hideNavigationBarWhenKeyboardShows: false,
+      resizeToAvoidBottomInset: true,
+      stateManagement: true,
+      hideNavigationBarWhenKeyboardShows: true,
       decoration: NavBarDecoration( colorBehindNavBar: Colors.white, ),
       popAllScreensOnTapOfSelectedTab: true,
       popActionScreens: PopActionScreensType.all,
@@ -155,7 +168,7 @@ class BaseRouteState extends State<BaseRoute> with TickerProviderStateMixin{
       screenTransitionAnimation: const ScreenTransitionAnimation(
         animateTabTransition: false,
       ),
-      navBarStyle: NavBarStyle.style3,
+      navBarStyle: NavBarStyle.style9,
     );
   }
 }

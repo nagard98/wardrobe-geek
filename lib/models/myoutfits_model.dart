@@ -1,23 +1,30 @@
 import 'dart:developer';
 import 'package:esempio/db/outfit_db_worker.dart';
 import 'package:esempio/models/article_model.dart';
+import 'package:esempio/models/explore_model.dart';
 import 'package:esempio/models/outfit_model.dart';
+import 'package:esempio/models/outfits_interface.dart';
 import 'package:esempio/models/profile_model.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:esempio/common/utils.dart';
 
-class MyOutfitsModel extends ChangeNotifier{
+class MyOutfitsModel extends ChangeNotifier implements OutfitsInterface{
   List<OutfitModel>? outfits = [];
   OutfitModel? currentOutfit;
   bool isLoading = false;
   bool isEditing = false;
+  Map<Filter,List> filters = {};
 
-  List<OutfitModel> filter() {
-    //TODO: Implementa filtro per outfit
-    throw UnimplementedError();
+  void filter(OutfitDBWorker outfitDBWorker, ProfileModel profile) async {
+    isLoading = true;
+    await Future.delayed(Duration(milliseconds: 400), () {});
+    outfits = (await outfitDBWorker.getAll(profile.id as int, filters: filters))?.cast<OutfitModel>();
+    isLoading = false;
+    notifyListeners();
   }
 
-  bool addOutfit(){
+  bool addOutfit(OutfitModel outfitModel){
     //TODO: implementa aggiunta outfit
     throw UnimplementedError();
   }
@@ -40,6 +47,12 @@ class MyOutfitsModel extends ChangeNotifier{
     isLoading = false;
     log(isLoading.toString());
     notifyListeners();
+  }
+
+  @override
+  List<OutfitModel> getListOutfits(Section section) {
+    //TODO: gestisci meglio l'argomento passato section per myoutfits
+    return outfits!;
   }
   
 }
