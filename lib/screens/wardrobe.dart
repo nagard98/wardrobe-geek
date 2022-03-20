@@ -5,17 +5,14 @@ import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:backdrop/backdrop.dart';
 import '../common/utils.dart';
-import 'package:shimmer/shimmer.dart';
 import 'article.dart';
 import 'package:esempio/models/wardrobe_model.dart';
 import 'package:esempio/db/article_db_worker.dart';
 import 'dart:io';
 import 'package:morpheus/morpheus.dart';
 import 'package:like_button/like_button.dart';
-import 'package:backdrop/backdrop.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart' as mbs;
 import 'package:scroll_app_bar/scroll_app_bar.dart';
-import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 
 class Wardrobe extends StatelessWidget {
@@ -29,17 +26,17 @@ class Wardrobe extends StatelessWidget {
     return ChangeNotifierProvider<WardrobeModel>.value(
       value: wardrobeModel,
       child: Container(
-        color: Color(0xFF425C5A),
+        color: const Color(0xFF425C5A),
         child: SafeArea(
           child: BackdropScaffold(
             maintainBackLayerState: true,
-            frontLayerBackgroundColor: Color(0xFF486563),
+            frontLayerBackgroundColor: const Color(0xFF486563),
             stickyFrontLayer: true,
             appBar: WardrobeAppBar(scrollController),
             frontLayer: WardrobeFrontLayer(
                 controller: controller, scrollController: scrollController),
             backLayer: const WardrobeBackLayer(),
-            floatingActionButton: WardrobeFAB(),
+            floatingActionButton: const WardrobeFAB(),
           ),
         ),
       ),
@@ -48,18 +45,20 @@ class Wardrobe extends StatelessWidget {
 }
 
 class WardrobeFAB extends StatelessWidget {
+  const WardrobeFAB({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Consumer<WardrobeModel>(builder: (context, wardrobe, child) {
       return FloatingActionButton(
-          backgroundColor: Color(0xFFA4626D),
-          foregroundColor: Color(0xFFFDCDA2),
+          backgroundColor: const Color(0xFFA4626D),
+          foregroundColor: const Color(0xFFFDCDA2),
           child: const Icon(Icons.add),
           onPressed: () {
             wardrobe.currentArticle = ArticleModel();
             Navigator.push(context, MaterialPageRoute(builder: (context) {
               //TODO: Correggi crash sporadico aggiunta immagine(scomparso?)
-              return NuovoArticolo();
+              return const NuovoArticolo();
             }));
           });
     });
@@ -69,7 +68,7 @@ class WardrobeFAB extends StatelessWidget {
 class WardrobeAppBar extends BackdropAppBar {
   WardrobeAppBar(this.scrollController, {Key? key}) : super(key: key);
 
-  final scrollController;
+  final ScrollController scrollController;
 
   @override
   Widget build(BuildContext context) {
@@ -164,13 +163,13 @@ class WardrobeBackLayerState extends State<WardrobeBackLayer> {
                   ),
                   //selectedColor: Color(0xFF425C5A),
                   decoration: BoxDecoration(),
-                  title: Text("Brand"),
+                  title: const Text("Brand"),
                   searchable: true,
                   items: _multiSelectFromMap(brands),
                   listType: MultiSelectListType.LIST,
                   chipDisplay: MultiSelectChipDisplay(
                     scroll: true,
-                    icon: Icon(Icons.close),
+                    icon: const Icon(Icons.close),
                     onTap: (value) {
                       setState(() {
                         _selectedBrands.remove(value);
@@ -201,12 +200,12 @@ class WardrobeBackLayerState extends State<WardrobeBackLayer> {
                   decoration: BoxDecoration(),
                   //selectedColor: Color(0xFF425C5A),
                   checkColor: Colors.white70,
-                  title: Text("Tipo Capo"),
+                  title: const Text("Tipo Capo"),
                   items: _multiSelectFromMap(clothing),
                   listType: MultiSelectListType.CHIP,
                   chipDisplay: MultiSelectChipDisplay(
                     scroll: true,
-                    icon: Icon(Icons.close),
+                    icon: const Icon(Icons.close),
                     onTap: (value) {
                       setState(() {
                         _selectedClothingType.remove(value);
@@ -244,17 +243,17 @@ class WardrobeBackLayerState extends State<WardrobeBackLayer> {
                     wardrobeModel.filters[Filter.secColor] = list!;
                   },
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Row(
                   children: [
                     Expanded(
                       child: ElevatedButton(
                         style: ButtonStyle(
                             foregroundColor:
-                                MaterialStateProperty.all(Color(0xFFFDCDA2)),
+                                MaterialStateProperty.all(const Color(0xFFFDCDA2)),
                             backgroundColor:
-                                MaterialStateProperty.all(Color(0xFF76454E))),
-                        child: Text("Filtra Articoli"),
+                                MaterialStateProperty.all(const Color(0xFF76454E))),
+                        child: const Text("Filtra Articoli"),
                         onPressed: () {
                           _save(context);
                         },
@@ -262,7 +261,7 @@ class WardrobeBackLayerState extends State<WardrobeBackLayer> {
                     )
                   ],
                 ),
-                SizedBox(height: 30),
+                const SizedBox(height: 30),
               ],
             ),
           ),
@@ -273,7 +272,7 @@ class WardrobeBackLayerState extends State<WardrobeBackLayer> {
 }
 
 class WardrobeFrontLayer extends StatefulWidget {
-  WardrobeFrontLayer(
+  const WardrobeFrontLayer(
       {Key? key, required this.controller, required this.scrollController})
       : super(key: key);
 
@@ -351,7 +350,7 @@ class WardrobeFrontLayerState extends State<WardrobeFrontLayer> {
                           wardrobe.isLoading ? 8 : wardrobe.articles?.length,
                     ),
                   ),
-                  BackdropSubHeader(
+                  const BackdropSubHeader(
                     title: Text("I Miei Articoli"),
                   ),
                 ],
@@ -365,10 +364,10 @@ class WardrobeFrontLayerState extends State<WardrobeFrontLayer> {
 }
 
 class ArticleCard extends StatelessWidget {
-  ArticleCard({Key? key, required this.wardrobe, required this.index}) : super(key: key);
+  const ArticleCard({Key? key, required this.wardrobe, required this.index}) : super(key: key);
 
-  WardrobeModel wardrobe;
-  int index;
+  final WardrobeModel wardrobe;
+  final int index;
 
   void _handleTap(BuildContext context, GlobalKey parentKey) {
     Navigator.of(context).push(MorpheusPageRoute(
@@ -385,10 +384,7 @@ class ArticleCard extends StatelessWidget {
       key: _parentKey,
       onTap: () => _handleTap(context, _parentKey),
       child: Card(
-        //shape: RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-        //elevation: 0,
-        //shape: RoundedRectangleBorder(side: BorderSide(color: Colors.indigo, width: 2), borderRadius: BorderRadius.circular(4)),
-        clipBehavior: Clip.hardEdge,
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
         child: Row(
           children: [
             Expanded(
@@ -410,7 +406,7 @@ class ArticleCard extends StatelessWidget {
                     likeBuilder: (bool isLiked) {
                       return Icon(
                         Icons.favorite,
-                        color: isLiked ? Color(0xFFDC4F4F) : Colors.grey,
+                        color: isLiked ? const Color(0xFFDC4F4F) : Colors.grey,
                       );
                     },
                     isLiked: wardrobe.articles!.elementAt(index).favorite,
@@ -425,7 +421,7 @@ class ArticleCard extends StatelessWidget {
                     },
                   ),
                   IconButton(
-                      color: Color(0xFF425C5A),
+                      color: const Color(0xFF425C5A),
                       onPressed: () {
                         mbs.showMaterialModalBottomSheet(
                           useRootNavigator: true,
@@ -440,7 +436,7 @@ class ArticleCard extends StatelessWidget {
                                       context: context,
                                       builder: (BuildContext context) {
                                         return AlertDialog(
-                                          content: Text(
+                                          content: const Text(
                                               "Sei sicuro di voler eliminare questo articolo?"),
                                           actions: <Widget>[
                                             TextButton(
