@@ -1,18 +1,11 @@
 import 'dart:developer';
-
 import 'package:esempio/models/article_model.dart';
 import 'package:esempio/models/outfit_model.dart';
-import 'package:esempio/models/wardrobe_model.dart';
 import 'package:esempio/common/utils.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:flutter/material.dart';
 import 'package:esempio/db/article_db_worker.dart';
-
-class Combo{
-  var Outfit;
-  List articles = [];
-}
 
 class OutfitDBWorker {
   OutfitDBWorker._();
@@ -97,7 +90,7 @@ class OutfitDBWorker {
   }
 
   Map<String, dynamic> outfitToMap(OutfitModel outfit, int idUser) {
-    Map<String, dynamic> map = Map<String, dynamic>();
+    Map<String, dynamic> map = <String, dynamic>{};
     map['idOutfit'] = outfit.id;
     map['idUser'] = idUser;
     map['imgPath'] = outfit.imgPath;
@@ -144,7 +137,7 @@ class OutfitDBWorker {
 
   String _buildCondition(Filter filter, List filterArgs, BooleanOp operator){
     List conditions = [];
-    filterArgs.forEach((element) {
+    for (var element in filterArgs) {
       switch (filter){
         case Filter.clothingType:
           conditions.add("clothingType='$element'");
@@ -174,7 +167,7 @@ class OutfitDBWorker {
           conditions.add("favorite='$element'");
           break;
       }
-    });
+    }
     log(conditions.toString());
     String op = operator==BooleanOp.and ? " AND " : " OR ";
     return conditions.isEmpty ? "" : '(${conditions.join(op)})';
@@ -191,12 +184,12 @@ class OutfitDBWorker {
   Future<List<dynamic>?> getAll(int idUser, {Map<Filter,List> filters=const {} }) async {
     Database? db = await _getDB();
     List<Map<String, Object?>>? recs;
-    String userIdCondition = idUser == -1 ? "" : "outfits.idUser='${idUser}'" ;
+    String userIdCondition = idUser == -1 ? "" : "outfits.idUser='$idUser'" ;
 
     if (filters.isEmpty) {
       recs = await _db?.rawQuery('SELECT outfits.idOutfit,outfits.idUser,articles.idArticle,outfits.imgPath as otfImg,season,likes,addedOn,favorite,dressCode,articles.imgPath as artImg,primColor,secColor,brand,clothingType,fav '
           'FROM outfits,outfit_articles,articles '
-          'WHERE ${userIdCondition} ${userIdCondition.isEmpty ? "" : "AND"} outfits.idOutfit=outfit_articles.idOutfit AND articles.idArticle=outfit_articles.idArticle');
+          'WHERE $userIdCondition ${userIdCondition.isEmpty ? "" : "AND"} outfits.idOutfit=outfit_articles.idOutfit AND articles.idArticle=outfit_articles.idArticle');
     }else{
       Map<Filter,String> stringedFilters = filters.map((key, value) => MapEntry(key,_buildCondition(key, value, BooleanOp.or)) );
       log(stringedFilters.toString());
@@ -227,7 +220,7 @@ class OutfitDBWorker {
   Future test(int id) async{
     return await _db?.rawQuery('SELECT *'
         'FROM outfits '
-        'WHERE outfits.idUser=${id}');
+        'WHERE outfits.idUser=$id');
   }
 
   Future test2(var recs) async{

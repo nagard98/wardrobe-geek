@@ -1,24 +1,15 @@
-import 'dart:io';
-import 'dart:developer';
 import 'package:esempio/db/outfit_db_worker.dart';
-import 'package:esempio/models/article_model.dart';
 import 'package:esempio/models/myoutfits_model.dart';
 import 'package:esempio/models/outfit_model.dart';
 import 'package:flutter/material.dart';
 import 'package:backdrop/backdrop.dart';
-import '../common/utils.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:esempio/common/utils.dart';
 import 'outfit.dart';
-import 'package:like_button/like_button.dart';
-import 'package:morpheus/morpheus.dart';
 import 'package:esempio/models/profile_model.dart';
 import 'package:provider/provider.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart' as mbs;
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:scroll_app_bar/scroll_app_bar.dart';
-import 'package:esempio/models/wardrobe_model.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
-import 'package:esempio/db/article_db_worker.dart';
 import 'package:esempio/models/explore_model.dart';
 
 class MyOutfits extends StatelessWidget {
@@ -32,15 +23,15 @@ class MyOutfits extends StatelessWidget {
     return ChangeNotifierProvider<MyOutfitsModel>.value(
       value: myOutfitsModel,
       child: Container(
-        color: Color(0xFF425C5A),
+        color: const Color(0xFF425C5A),
         child: SafeArea(
           child: BackdropScaffold(
-            frontLayerBackgroundColor: Color(0xFF425C5A),
+            frontLayerBackgroundColor: const Color(0xFF425C5A),
             stickyFrontLayer: true,
             appBar: MyOutfitsAppBar(scrollController),
             frontLayer: MyOutfitsFrontLayer(controller: controller, scrollController: scrollController),
-            backLayer: MyOutfitsBackLayer(),
-            floatingActionButton: MyOutfitsFAB(),
+            backLayer: const MyOutfitsBackLayer(),
+            floatingActionButton: const MyOutfitsFAB(),
           ),
         ),
       ),
@@ -49,17 +40,19 @@ class MyOutfits extends StatelessWidget {
 }
 
 class MyOutfitsFAB extends StatelessWidget {
+  const MyOutfitsFAB({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Consumer<MyOutfitsModel>(builder: (context, myoutfits, child) {
       return FloatingActionButton(
-          child: Icon(Icons.add),
-          backgroundColor: Color(0xFF683D49),
-          foregroundColor: Color(0xFFFDCDA2),
+          child: const Icon(Icons.add),
+          backgroundColor: const Color(0xFF683D49),
+          foregroundColor: const Color(0xFFFDCDA2),
           onPressed: () {
             myoutfits.currentOutfit = OutfitModel();
             Navigator.push(context, MaterialPageRoute(builder: (context) {
-              return NuovoOutfit();
+              return const NuovoOutfit();
             }));
           });
     });
@@ -69,7 +62,7 @@ class MyOutfitsFAB extends StatelessWidget {
 class MyOutfitsAppBar extends BackdropAppBar {
   MyOutfitsAppBar(this.scrollController, {Key? key}) : super(key: key);
 
-  final scrollController;
+  final ScrollController scrollController;
 
   @override
   Widget build(BuildContext context) {
@@ -89,6 +82,8 @@ class MyOutfitsAppBar extends BackdropAppBar {
 }
 
 class MyOutfitsBackLayer extends StatefulWidget{
+  const MyOutfitsBackLayer({Key? key}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() {
     return MyOutfitsBackLayerState();
@@ -162,14 +157,14 @@ class MyOutfitsBackLayerState extends State<MyOutfitsBackLayer> {
                     color: Color(0xFFA4626D),
                   ),
                   //selectedColor: Color(0xFF425C5A),
-                  decoration: BoxDecoration(),
-                  title: Text("Stagione"),
+                  decoration: const BoxDecoration(),
+                  title: const Text("Stagione"),
                   searchable: true,
                   items: _multiSelectFromMap(seasons),
                   listType: MultiSelectListType.CHIP,
                   chipDisplay: MultiSelectChipDisplay(
                     scroll: true,
-                    icon: Icon(Icons.close),
+                    icon: const Icon(Icons.close),
                     onTap: (value) {
                       setState(() {
                         _selectedSeasons.remove(value);
@@ -197,15 +192,15 @@ class MyOutfitsBackLayerState extends State<MyOutfitsBackLayer> {
                     Icons.add,
                     color: Color(0xFFA4626D),
                   ),
-                  decoration: BoxDecoration(),
+                  decoration: const BoxDecoration(),
                   //selectedColor: Color(0xFF425C5A),
                   checkColor: Colors.white70,
-                  title: Text("Dress Code"),
+                  title: const Text("Dress Code"),
                   items: _multiSelectFromMap(dressCodes),
                   listType: MultiSelectListType.CHIP,
                   chipDisplay: MultiSelectChipDisplay(
                     scroll: true,
-                    icon: Icon(Icons.close),
+                    icon: const Icon(Icons.close),
                     onTap: (value) {
                       setState(() {
                         _selectedDressCodes.remove(value);
@@ -219,17 +214,17 @@ class MyOutfitsBackLayerState extends State<MyOutfitsBackLayer> {
                     myOutfitsModel.filters[Filter.dressCode] = values ?? [];
                   },
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Row(
                   children: [
                     Expanded(
                       child: ElevatedButton(
                         style: ButtonStyle(
                             foregroundColor:
-                            MaterialStateProperty.all(Color(0xFFFDCDA2)),
+                            MaterialStateProperty.all(const Color(0xFFFDCDA2)),
                             backgroundColor:
-                            MaterialStateProperty.all(Color(0xFF76454E))),
-                        child: Text("Filtra Articoli"),
+                            MaterialStateProperty.all(const Color(0xFF76454E))),
+                        child: const Text("Filtra Articoli"),
                         onPressed: () {
                           _save(context);
                         },
@@ -237,7 +232,7 @@ class MyOutfitsBackLayerState extends State<MyOutfitsBackLayer> {
                     )
                   ],
                 ),
-                SizedBox(height: 30),
+                const SizedBox(height: 30),
               ],
             ),
           ),
@@ -295,11 +290,11 @@ class MyOutfitsFrontLayerState extends State<MyOutfitsFrontLayer>{
             return Stack(
               children: [
                 Padding(
-                  padding: EdgeInsets.only(top: 52,left: 6.0, right: 6.0),
+                  padding: const EdgeInsets.only(top: 52,left: 6.0, right: 6.0),
                   child: AnimationLimiter(
                     child: GridView.builder(
                       controller: widget.scrollController,
-                      padding: EdgeInsets.only(bottom: 30),
+                      padding: const EdgeInsets.only(bottom: 30),
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
                         childAspectRatio: 0.6,
@@ -319,7 +314,7 @@ class MyOutfitsFrontLayerState extends State<MyOutfitsFrontLayer>{
                     ),
                   ),
                 ),
-                BackdropSubHeader(
+                const BackdropSubHeader(
                   title: Text("I Miei Outfit"),
                 ),
               ],

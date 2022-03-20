@@ -1,6 +1,5 @@
 import 'package:esempio/models/profile_model.dart';
 import 'package:flutter/material.dart';
-import 'dart:developer';
 import 'package:sleek_circular_slider/sleek_circular_slider.dart';
 import 'package:esempio/screens/settings.dart';
 import 'package:provider/provider.dart';
@@ -98,9 +97,9 @@ class ProfileFrontLayerState extends State<ProfileFrontLayer> {
                         Container(
                           height: 185,
                           decoration: BoxDecoration(
-                              color: Color(0xFF425C5A),
+                              color: const Color(0xFF425C5A),
                               border: Border.all(
-                                  color: Color(0xFF425C5A), width: 2)),
+                                  color: const Color(0xFF425C5A), width: 2)),
                         ),
                         Container(
                           decoration: const BoxDecoration(
@@ -109,7 +108,7 @@ class ProfileFrontLayerState extends State<ProfileFrontLayer> {
                                   topLeft: Radius.circular(16),
                                   topRight: Radius.circular(16))),
                           height: 60,
-                          margin: EdgeInsets.only(top: 130),
+                          margin: const EdgeInsets.only(top: 130),
                         ),
                         const ProfilePicture(),
                       ],
@@ -123,8 +122,8 @@ class ProfileFrontLayerState extends State<ProfileFrontLayer> {
                           const SizedBox(
                             height: 20,
                           ),
-                          Text("Gianni Fantoni"),
-                          Text("Italia, Milano"),
+                          const Text("Gianni Fantoni"),
+                          const Text("Italia, Milano"),
                           const SizedBox(
                             height: 30,
                           ),
@@ -132,26 +131,26 @@ class ProfileFrontLayerState extends State<ProfileFrontLayer> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Container(
-                                padding: EdgeInsets.all(20),
+                                padding: const EdgeInsets.all(20),
                                 decoration: BoxDecoration(
-                                    color: Color(0xFFFDCDA2),
+                                    color: const Color(0xFFFDCDA2),
                                     border: Border.all(
-                                        color: Color(0xFFFDCDA2), width: 0),
+                                        color: const Color(0xFFFDCDA2), width: 0),
                                     borderRadius: const BorderRadius.only(
                                         topLeft: Radius.circular(10),
                                         bottomLeft: Radius.circular(10))),
-                                child: Text("Followers"),
+                                child: const Text("Followers"),
                               ),
                               Container(
-                                padding: EdgeInsets.all(20),
+                                padding: const EdgeInsets.all(20),
                                 decoration: BoxDecoration(
-                                    color: Color(0xFFFDCDA2),
+                                    color: const Color(0xFFFDCDA2),
                                     border: Border.all(
-                                        color: Color(0xFFFDCDA2), width: 0),
+                                        color: const Color(0xFFFDCDA2), width: 0),
                                     borderRadius: const BorderRadius.only(
                                         topRight: Radius.circular(10),
                                         bottomRight: Radius.circular(10))),
-                                child: Text("Following"),
+                                child: const Text("Following"),
                               ),
                             ],
                           ),
@@ -240,8 +239,8 @@ class ProfilePicture extends StatelessWidget {
                 },
                 appearance: CircularSliderAppearance(
                   customColors: CustomSliderColors(
-                    progressBarColor: Color(0xFFF39053),
-                    trackColor: Color(0xFFA4626D)
+                    progressBarColor: const Color(0xFFF39053),
+                    trackColor: const Color(0xFFA4626D)
                   ),
                   customWidths: CustomSliderWidths(progressBarWidth: 10),
                   size: 170,

@@ -1,7 +1,5 @@
 import 'dart:developer';
 import 'package:esempio/models/article_model.dart';
-import 'package:esempio/models/profile_model.dart';
-import 'package:esempio/models/wardrobe_model.dart';
 import 'package:esempio/common/utils.dart' as utils;
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -66,7 +64,7 @@ class ArticleDBWorker {
   }
 
   Map<String,dynamic> articleToMap(ArticleModel article, int idUser){
-    Map<String,dynamic> map = Map<String,dynamic>();
+    Map<String,dynamic> map = <String,dynamic>{};
     map['idArticle'] = article.id;
     map['idUser'] = idUser;
     map['imgPath'] = article.imgPath;
@@ -114,7 +112,7 @@ class ArticleDBWorker {
 
   String _buildCondition(Filter filter, List filterArgs, BooleanOp operator){
     List conditions = [];
-    filterArgs.forEach((element) {
+    for (var element in filterArgs) {
       switch (filter){
         case Filter.clothingType:
           conditions.add("clothingType='$element'");
@@ -130,8 +128,21 @@ class ArticleDBWorker {
           break;
         case Filter.fav:
           conditions.add("fav='$element'");
+          break;
+        case Filter.favorite:
+          // TODO: Handle this case.
+          break;
+        case Filter.season:
+          // TODO: Handle this case.
+          break;
+        case Filter.like:
+          // TODO: Handle this case.
+          break;
+        case Filter.dressCode:
+          // TODO: Handle this case.
+          break;
       }
-    });
+    }
     log(conditions.toString());
     String op = operator==BooleanOp.and ? " AND " : " OR ";
     return conditions.isEmpty ? "" : '(${conditions.join(op)})';
@@ -150,7 +161,7 @@ class ArticleDBWorker {
 
       log("Before: $cleanedFilters");
       cleanedFilters.removeWhere((element) => element=="");
-      cleanedFilters.add("idUser='${idUser}'");
+      cleanedFilters.add("idUser='$idUser'");
       log("After: $cleanedFilters");
 
       recs = await _db?.rawQuery('SELECT * FROM articles '

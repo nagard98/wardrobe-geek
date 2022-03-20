@@ -41,7 +41,7 @@ class ExploreModel extends ChangeNotifier implements OutfitsInterface {
   void filterOutfits(OutfitDBWorker outfitDBWorker, ProfileModel profile, ) async {
     isFilteredOutfits = true;
     isLoading = true;
-    await Future.delayed(Duration(milliseconds: 400), () {});
+    await Future.delayed(const Duration(milliseconds: 400), () {});
     exploreMap[Section.filteredOutf] = (await outfitDBWorker.getAll(-1, filters: filters))!;
     isLoading = false;
     notifyListeners();
@@ -53,6 +53,7 @@ class ExploreModel extends ChangeNotifier implements OutfitsInterface {
     throw UnimplementedError();
   }
 
+  @override
   void removeOutfit(OutfitDBWorker outfitDBWorker, int idOutfit, ProfileModel profile) async{
     await outfitDBWorker.delete(idOutfit);
     loadOutfits(outfitDBWorker, profile);

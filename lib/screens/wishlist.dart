@@ -4,6 +4,8 @@ import '../common/utils.dart';
 
 
 class WishlistAppBar extends BackdropAppBar{
+  WishlistAppBar({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return BackdropAppBar(
@@ -11,15 +13,17 @@ class WishlistAppBar extends BackdropAppBar{
       actions: const [
         BackdropToggleButton()
       ],
-      title: Text('Wishlist'),
+      title: const Text('Wishlist'),
     );
   }
 }
 
 class WishlistBackLayer extends StatelessWidget{
+  const WishlistBackLayer({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: const [
@@ -39,6 +43,8 @@ class WishlistBackLayer extends StatelessWidget{
 }
 
 class WishlistFrontLayer extends StatefulWidget{
+  const WishlistFrontLayer({Key? key}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() {
     return WishlistFrontLayerState();
@@ -46,8 +52,8 @@ class WishlistFrontLayer extends StatefulWidget{
 }
 
 class WishlistFrontLayerState extends State<WishlistFrontLayer> {
-  Widget buildCard(CardItem card) => card;
-  List<CardItem> items = [];
+/*  Widget buildCard(CardItem card) => card;*/
+  List items = [];
   bool isLoading = false;
 
   @override
@@ -66,7 +72,7 @@ class WishlistFrontLayerState extends State<WishlistFrontLayer> {
       child: Stack(
         children: [
           Container(
-            margin: EdgeInsets.only(top: 52),
+            margin: const EdgeInsets.only(top: 52),
             child: GridView.builder(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 childAspectRatio: 0.7,
@@ -78,14 +84,14 @@ class WishlistFrontLayerState extends State<WishlistFrontLayer> {
                 if (isLoading) {
                   return buildCardShimmer();
                 } else {
-                  return Card();
+                  return const Card();
                 }
               },
               itemCount: isLoading ? 8 : items.length,
             ),
           ),
-          Container(
-            child: const BackdropSubHeader(
+          const SizedBox(
+            child: BackdropSubHeader(
               title: Text("Titolo"),
             ),
           ),

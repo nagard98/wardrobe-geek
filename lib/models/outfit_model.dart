@@ -1,5 +1,4 @@
 import 'package:esempio/models/article_model.dart';
-import 'package:flutter/widgets.dart';
 
 /*enum Season {estate, inverno, primavera, autunno, qualsiasi}
 enum DressCode {casual, formalCasual, informale, streetwear, businessCasual, altro}*/

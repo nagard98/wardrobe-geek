@@ -1,8 +1,6 @@
 import 'dart:io';
-import 'dart:math';
 import 'package:esempio/db/outfit_db_worker.dart';
 import 'package:esempio/models/outfit_model.dart';
-import 'package:esempio/screens/my_outfits.dart';
 import 'package:esempio/screens/outfit.dart';
 import 'package:flutter/material.dart';
 import 'package:backdrop/backdrop.dart';
@@ -15,16 +13,13 @@ import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:esempio/db/article_db_worker.dart';
 import 'package:esempio/models/wardrobe_model.dart';
 import 'package:esempio/models/article_model.dart';
-import 'package:morpheus/morpheus.dart';
 import 'package:esempio/screens/explore_outfits.dart';
 import 'package:animations/animations.dart';
-import 'package:bluejay/bluejay.dart' as Bluejay;
-import 'package:lazy_load_indexed_stack/lazy_load_indexed_stack.dart';
 
 class Explore extends StatelessWidget {
   Explore({Key? key, required this.controller}) : super(key: key);
 
-  int currentIndex = 0;
+  final int currentIndex = 0;
   final AnimationController controller;
   final scrollController = ScrollController();
 
@@ -33,21 +28,21 @@ class Explore extends StatelessWidget {
     return ChangeNotifierProvider<ExploreModel>.value(
       value: exploreModel,
       child: Container(
-        color: Color(0xFF425C5A),
+        color: const Color(0xFF425C5A),
         child: SafeArea(
           child: BackdropScaffold(
-            frontLayerBackgroundColor: Color(0xFF425C5A),
+            frontLayerBackgroundColor: const Color(0xFF425C5A),
             stickyFrontLayer: true,
             maintainBackLayerState: true,
             appBar: ExploreAppBar(scrollController),
             frontLayer:
                 Consumer<ExploreModel>(builder: (context, explore, child) {
               return PageTransitionSwitcher(
-                duration: Duration(milliseconds: 400),
+                duration: const Duration(milliseconds: 400),
                 transitionBuilder: (widget, anim1, anim2) {
                   return SharedAxisTransition(
                     transitionType: SharedAxisTransitionType.vertical,
-                    fillColor: Color(0xFF425C5A),
+                    fillColor: const Color(0xFF425C5A),
                     animation:  anim1,
                     secondaryAnimation: anim2,
                     child: widget,
@@ -64,7 +59,7 @@ class Explore extends StatelessWidget {
                 ]),
               );
             }),
-            backLayer: ExploreBackLayer(),
+            backLayer: const ExploreBackLayer(),
           ),
         ),
       ),
@@ -75,7 +70,7 @@ class Explore extends StatelessWidget {
 class ExploreAppBar extends BackdropAppBar {
   ExploreAppBar(this.scrollController, {Key? key}) : super(key: key);
 
-  final scrollController;
+  final ScrollController scrollController;
 
   @override
   Widget build(BuildContext context) {
@@ -85,11 +80,11 @@ class ExploreAppBar extends BackdropAppBar {
         controller: scrollController,
         leading: explore.currentIndex > 0
             ? IconButton(
-                icon: Icon(Icons.arrow_back),
+                icon: const Icon(Icons.arrow_back),
                 onPressed: () {
                   explore.showScreen(0);
                 })
-            : SizedBox(),
+            : null,
         elevation: 0,
         automaticallyImplyLeading: false,
         actions: const [
@@ -103,42 +98,18 @@ class ExploreAppBar extends BackdropAppBar {
   }
 }
 
-class ExploreBackLayer extends StatefulWidget {
+/*class ExploreBackLayer extends StatefulWidget {
+  const ExploreBackLayer({Key? key}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() {
     return ExploreBackLayerState();
   }
-}
+}*/
 
-class ExploreBackLayerState extends State<ExploreBackLayer> {
-  final GlobalKey<FormState> _outfitFormKey = GlobalKey<FormState>();
-  final GlobalKey<FormState> _userFormKey = GlobalKey<FormState>();
+class ExploreBackLayer extends StatelessWidget {
+  const ExploreBackLayer({Key? key}) : super(key: key);
 
-  List<MultiSelectItem> _multiSelectFromMap(Map<int, String> map) {
-    List<MultiSelectItem> items = [];
-    map.forEach((key, value) {
-      items.add(
-        MultiSelectItem(key, value),
-      );
-    });
-    return items;
-  }
-
-  List _selectedBrands = [];
-  List _selectedClothingType = [];
-  List _selectedSeasons = [];
-  List _selectedDressCodes = [];
-
-  _save(BuildContext context) async {
-    _outfitFormKey.currentState!.save();
-    //TODO: Add validation to input
-
-    wardrobeModel.filter(ArticleDBWorker.articleDBWorker, profile);
-
-    Backdrop.of(context).concealBackLayer();
-    ScaffoldMessenger.of(context)
-        .showSnackBar(const SnackBar(content: Text("Filtrato con successo")));
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -147,24 +118,24 @@ class ExploreBackLayerState extends State<ExploreBackLayer> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          TabBar(padding: EdgeInsets.only(bottom: 3), tabs: [
+          TabBar(padding: const EdgeInsets.only(bottom: 3), tabs: [
             Tab(
               child: Row(
-                children: [Icon(Icons.directions_transit), Text("Outfits")],
+                children: const [Icon(Icons.directions_transit), Text("Outfits")],
                 mainAxisAlignment: MainAxisAlignment.center,
               ),
             ),
             Tab(
               child: Row(
-                children: [Icon(Icons.directions_bike), Text("Utenti")],
+                children: const [Icon(Icons.directions_bike), Text("Utenti")],
                 mainAxisAlignment: MainAxisAlignment.center,
               ),
             ),
           ]),
           ConstrainedBox(
-            constraints: BoxConstraints(maxHeight: 400),
-            child: TabBarView(
-              children: [ExploreFilterListOutfit(), ExploreFilterListUser()],
+            constraints: const BoxConstraints(maxHeight: 400),
+            child: const TabBarView(
+              children: [ExploreBackLayerOutfit(), ExploreBackLayerUser()],
             ),
           ),
         ],
@@ -173,14 +144,16 @@ class ExploreBackLayerState extends State<ExploreBackLayer> {
   }
 }
 
-class ExploreFilterListUser extends StatefulWidget {
+class ExploreBackLayerUser extends StatefulWidget {
+  const ExploreBackLayerUser({Key? key}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() {
-    return ExploreFilterListUserState();
+    return ExploreBackLayerUserState();
   }
 }
 
-class ExploreFilterListUserState extends State<ExploreFilterListUser>
+class ExploreBackLayerUserState extends State<ExploreBackLayerUser>
     with AutomaticKeepAliveClientMixin {
   final GlobalKey<FormState> _userFormKey = GlobalKey<FormState>();
 
@@ -245,14 +218,14 @@ class ExploreFilterListUserState extends State<ExploreFilterListUser>
                     color: Color(0xFFA4626D),
                   ),
                   //selectedColor: Color(0xFF425C5A),
-                  decoration: BoxDecoration(),
-                  title: Text("Brand"),
+                  decoration: const BoxDecoration(),
+                  title: const Text("Brand"),
                   searchable: true,
                   items: _multiSelectFromMap(brands),
                   listType: MultiSelectListType.LIST,
                   chipDisplay: MultiSelectChipDisplay(
                     scroll: true,
-                    icon: Icon(Icons.close),
+                    icon: const Icon(Icons.close),
                     onTap: (value) {
                       setState(() {
                         _selectedBrands.remove(value);
@@ -280,15 +253,15 @@ class ExploreFilterListUserState extends State<ExploreFilterListUser>
                     Icons.add,
                     color: Color(0xFFA4626D),
                   ),
-                  decoration: BoxDecoration(),
+                  decoration: const BoxDecoration(),
                   //selectedColor: Color(0xFF425C5A),
                   checkColor: Colors.white70,
-                  title: Text("Tipo Capo"),
+                  title: const Text("Tipo Capo"),
                   items: _multiSelectFromMap(clothing),
                   listType: MultiSelectListType.CHIP,
                   chipDisplay: MultiSelectChipDisplay(
                     scroll: true,
-                    icon: Icon(Icons.close),
+                    icon: const Icon(Icons.close),
                     onTap: (value) {
                       setState(() {
                         _selectedClothingType.remove(value);
@@ -318,17 +291,17 @@ class ExploreFilterListUserState extends State<ExploreFilterListUser>
                 MultiSelectColorField(
                   text: "Colore Secondario",
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Row(
                   children: [
                     Expanded(
                       child: ElevatedButton(
                         style: ButtonStyle(
                             foregroundColor:
-                                MaterialStateProperty.all(Color(0xFFFDCDA2)),
+                                MaterialStateProperty.all(const Color(0xFFFDCDA2)),
                             backgroundColor:
-                                MaterialStateProperty.all(Color(0xFF76454E))),
-                        child: Text("Filtra Articoli"),
+                                MaterialStateProperty.all(const Color(0xFF76454E))),
+                        child: const Text("Filtra Articoli"),
                         onPressed: () {
                           _save(context);
                         },
@@ -336,7 +309,7 @@ class ExploreFilterListUserState extends State<ExploreFilterListUser>
                     )
                   ],
                 ),
-                SizedBox(height: 30),
+                const SizedBox(height: 30),
               ],
             ),
           ),
@@ -349,16 +322,16 @@ class ExploreFilterListUserState extends State<ExploreFilterListUser>
   bool get wantKeepAlive => true;
 }
 
-class ExploreFilterListOutfit extends StatefulWidget {
-  const ExploreFilterListOutfit({Key? key}) : super(key: key);
+class ExploreBackLayerOutfit extends StatefulWidget {
+  const ExploreBackLayerOutfit({Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
-    return ExploreFilterListOutfitState();
+    return ExploreBackLayerOutfitState();
   }
 }
 
-class ExploreFilterListOutfitState extends State<ExploreFilterListOutfit>
+class ExploreBackLayerOutfitState extends State<ExploreBackLayerOutfit>
     with AutomaticKeepAliveClientMixin {
   final GlobalKey<FormState> _outfitFormKey = GlobalKey<FormState>();
 
@@ -423,14 +396,14 @@ class ExploreFilterListOutfitState extends State<ExploreFilterListOutfit>
                     color: Color(0xFFA4626D),
                   ),
                   //selectedColor: Color(0xFF425C5A),
-                  decoration: BoxDecoration(),
-                  title: Text("Stagione"),
+                  decoration: const BoxDecoration(),
+                  title: const Text("Stagione"),
                   searchable: true,
                   items: _multiSelectFromMap(seasons),
                   listType: MultiSelectListType.CHIP,
                   chipDisplay: MultiSelectChipDisplay(
                     scroll: true,
-                    icon: Icon(Icons.close),
+                    icon: const Icon(Icons.close),
                     onTap: (value) {
                       setState(() {
                         _selectedSeasons.remove(value);
@@ -458,15 +431,15 @@ class ExploreFilterListOutfitState extends State<ExploreFilterListOutfit>
                     Icons.add,
                     color: Color(0xFFA4626D),
                   ),
-                  decoration: BoxDecoration(),
+                  decoration: const BoxDecoration(),
                   //selectedColor: Color(0xFF425C5A),
                   checkColor: Colors.white70,
-                  title: Text("Dress Code"),
+                  title: const Text("Dress Code"),
                   items: _multiSelectFromMap(dressCodes),
                   listType: MultiSelectListType.CHIP,
                   chipDisplay: MultiSelectChipDisplay(
                     scroll: true,
-                    icon: Icon(Icons.close),
+                    icon: const Icon(Icons.close),
                     onTap: (value) {
                       setState(() {
                         _selectedDressCodes.remove(value);
@@ -480,17 +453,17 @@ class ExploreFilterListOutfitState extends State<ExploreFilterListOutfit>
                     exploreModel.filters[Filter.dressCode] = values ?? [];
                   },
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Row(
                   children: [
                     Expanded(
                       child: ElevatedButton(
                         style: ButtonStyle(
                             foregroundColor:
-                                MaterialStateProperty.all(Color(0xFFFDCDA2)),
+                                MaterialStateProperty.all(const Color(0xFFFDCDA2)),
                             backgroundColor:
-                                MaterialStateProperty.all(Color(0xFF76454E))),
-                        child: Text("Filtra Articoli"),
+                                MaterialStateProperty.all(const Color(0xFF76454E))),
+                        child: const Text("Filtra Articoli"),
                         onPressed: () {
                           _save(context);
                         },
@@ -498,7 +471,7 @@ class ExploreFilterListOutfitState extends State<ExploreFilterListOutfit>
                     )
                   ],
                 ),
-                SizedBox(height: 30),
+                const SizedBox(height: 30),
               ],
             ),
           ),
@@ -570,10 +543,10 @@ class ExploreFrontLayerState extends State<ExploreFrontLayer> {
                     children: [
                       Padding(
                         padding:
-                            EdgeInsets.only(top: 52, left: 6.0, right: 6.0),
+                            const EdgeInsets.only(top: 52, left: 6.0, right: 6.0),
                         child: GridView.builder(
                           controller: widget.scrollController,
-                          padding: EdgeInsets.only(bottom: 30),
+                          padding: const EdgeInsets.only(bottom: 30),
                           gridDelegate:
                               const SliverGridDelegateWithFixedCrossAxisCount(
                             childAspectRatio: 0.6,
@@ -597,7 +570,7 @@ class ExploreFrontLayerState extends State<ExploreFrontLayer> {
                                   .exploreMap[Section.filteredOutf]?.length,
                         ),
                       ),
-                      BackdropSubHeader(
+                      const BackdropSubHeader(
                         title: Text("I Miei Outfit"),
                       ),
                     ],
@@ -616,6 +589,7 @@ class ExploreFrontLayerState extends State<ExploreFrontLayer> {
                               HorizontalMoreList(
                                 explore: explore,
                                 section: Section.recOutf,
+                                cardShape: const RoundedRectangleBorder(),
                                 title: "Consigliati per Te",
                               ),
                               const SizedBox(
@@ -624,6 +598,7 @@ class ExploreFrontLayerState extends State<ExploreFrontLayer> {
                               HorizontalMoreList(
                                 explore: explore,
                                 section: Section.newHotOutf,
+                                cardShape: const RoundedRectangleBorder(),
                                 title: "Nuovi di Tendenza",
                               ),
                               const SizedBox(
@@ -632,6 +607,7 @@ class ExploreFrontLayerState extends State<ExploreFrontLayer> {
                               HorizontalMoreList(
                                 section: Section.popOutf,
                                 explore: explore,
+                                cardShape: const RoundedRectangleBorder(),
                                 title: "I Più Popolari",
                               ),
                               const SizedBox(
@@ -641,7 +617,7 @@ class ExploreFrontLayerState extends State<ExploreFrontLayer> {
                                 section: Section.popUsers,
                                 explore: explore,
                                 title: "I Migliori Designer",
-                                cardShape: CircleBorder(),
+                                cardShape: const CircleBorder(),
                                 itemHeight: 150,
                               ),
                             ],
@@ -649,7 +625,7 @@ class ExploreFrontLayerState extends State<ExploreFrontLayer> {
                         ],
                       ),
                     ),
-                    BackdropSubHeader(
+                    const BackdropSubHeader(
                       title: Text("Esplora la Community"),
                     ),
                   ],
@@ -658,107 +634,6 @@ class ExploreFrontLayerState extends State<ExploreFrontLayer> {
             },
           ),
         ),
-      ),
-    );
-  }
-}
-
-class HorizontalMoreList extends StatelessWidget {
-  HorizontalMoreList(
-      {Key? key,
-      this.title = 'Title',
-      this.explore,
-      required this.section,
-      this.itemHeight = 250,
-      this.cardShape = const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(4)))})
-      : super(key: key);
-
-  void _handleTap(BuildContext context, GlobalKey parentKey) {
-    /*Navigator.of(context).push(MorpheusPageRoute(
-      builder: (context) => ExploreOutfits(),
-      parentKey: parentKey,
-    ));*/
-/*    pushNewScreen(context,
-        screen: FilteredOutfitsFrontLayer(subheaderTitle: "Titolo",),
-        withNavBar: true,
-        pageTransitionAnimation: PageTransitionAnimation.cupertino);*/
-  }
-
-  final bool isLoading = false;
-  double itemHeight;
-  ShapeBorder cardShape;
-  String title;
-  ExploreModel? explore;
-  Section section;
-
-  @override
-  Widget build(BuildContext context) {
-    final _parentKey = GlobalKey();
-    return Padding(
-      padding: const EdgeInsets.only(left: 8.0),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(title),
-              TextButton(
-                style: ButtonStyle(
-                    overlayColor: MaterialStateProperty.all(Color(0xFFFDCDA2)),
-                    foregroundColor:
-                        MaterialStateProperty.all(Color(0xFFA4626D))),
-                onPressed: () {
-                  explore?.showScreen(1);
-                },
-                child: Row(
-                  children: [Text("Vedi Tutti"), Icon(Icons.arrow_forward_ios)],
-                ),
-              ),
-            ],
-          ),
-          SizedBox(
-            height: itemHeight,
-            child: GridView.builder(
-              scrollDirection: Axis.horizontal,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                childAspectRatio: 1.5,
-                crossAxisCount: 1,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
-              ),
-              itemBuilder: (context, index) {
-                if (explore!.isLoading) {
-                  return buildCardShimmer();
-                } else {
-                  return InkWell(
-                    child: Card(
-                      shape: cardShape,
-                      clipBehavior: Clip.hardEdge,
-                      child: Image.file(
-                        //TODO: implement dynamic loading
-                        File(explore?.exploreMap[section]?[index].imgPath
-                            as String),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    onTap: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => Outfit(
-                              outfit: explore?.exploreMap[section]
-                                  ?.elementAt(index) as OutfitModel)));
-                    },
-                  );
-                }
-              },
-              itemCount: explore!.isLoading
-                  ? 4
-                  : (explore?.exploreMap[section]?.length as int > 4
-                      ? 4
-                      : explore?.exploreMap[section]?.length),
-            ),
-          ),
-        ],
       ),
     );
   }

@@ -22,26 +22,12 @@ class FilteredOutfitsFrontLayer extends StatefulWidget {
   }
 }
 
-class FilteredOutfitsFrontLayerState extends State<FilteredOutfitsFrontLayer> with TickerProviderStateMixin{
-
-  late Animation<double> _animationScale;
-  late Animation<double> _animationOpacity;
-  //late AnimationController controller;
-
+class FilteredOutfitsFrontLayerState extends State<FilteredOutfitsFrontLayer>{
 
   @override
   void initState() {
     super.initState();
-  /*controller = AnimationController(vsync: this, duration: Duration(milliseconds: 350));
-  _animationScale = Tween(begin: 0.6, end: 1.0).animate(controller);
-  _animationOpacity = Tween(begin: 0.3, end: 1.0).animate(controller);*/
     //myOutfitsModel.loadOutfits(OutfitDBWorker.outfitDBWorker, profile);
-  }
-
-  @override
-  void dispose() {
-    //controller.dispose();
-    super.dispose();
   }
 
   @override
@@ -76,7 +62,7 @@ class FilteredOutfitsFrontLayerState extends State<FilteredOutfitsFrontLayer> wi
                     }
                   },
                   itemCount:
-                  explore.isLoading ? 8 : explore.getListOutfits(Section.filteredOutf).length,
+                  explore.isLoading ? 8 : explore.getListOutfits(Section.recOutf).length,
                 ),
               ),
             ),

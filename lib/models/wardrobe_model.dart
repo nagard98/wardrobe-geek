@@ -1,6 +1,5 @@
 import 'dart:developer';
 import 'package:esempio/models/profile_model.dart';
-import 'package:provider/provider.dart';
 import 'package:esempio/db/article_db_worker.dart';
 import 'package:esempio/models/article_model.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +14,7 @@ class WardrobeModel extends ChangeNotifier {
 
   void filter(ArticleDBWorker articleDBWorker, ProfileModel profile) async{
     isLoading = true;
-    await Future.delayed(Duration(milliseconds: 400), () {});
+    await Future.delayed(const Duration(milliseconds: 400), () {});
     articles = (await articleDBWorker.getAll(profile.id as int, filters: filters))?.cast<ArticleModel>();
     isLoading = false;
     notifyListeners();
@@ -39,7 +38,7 @@ class WardrobeModel extends ChangeNotifier {
 
   void loadArticles(ArticleDBWorker articleDBWorker, ProfileModel profile) async {
     isLoading = true;
-    await Future.delayed(Duration(milliseconds: 500), () {});
+    await Future.delayed(const Duration(milliseconds: 500), () {});
     articles = (await articleDBWorker.getAll(profile.id as int))?.cast<ArticleModel>();
     isLoading = false;
     notifyListeners();

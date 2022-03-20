@@ -13,18 +13,19 @@ import 'package:esempio/models/explore_model.dart';
 import 'package:esempio/models/profile_model.dart';
 import 'package:esempio/db/outfit_db_worker.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart' as mbs;
+import 'package:esempio/models/outfit_model.dart';
 
 late Directory docsDir;
 
 enum Filter { clothingType, brand, primColor, secColor, fav , favorite, season, like, dressCode}
-
+/*
 class CardExtended extends StatelessWidget {
   const CardExtended({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
+      body: SizedBox(
         child: Hero(
           tag: "photo",
           child: Image.network(
@@ -35,14 +36,117 @@ class CardExtended extends StatelessWidget {
       ),
     );
   }
-}
+}*/
 
 Widget buildCardShimmer() => Shimmer.fromColors(
     child: const Card(),
     baseColor: const Color(0xFFE3E1E1),
     highlightColor: const Color(0xFFEFEFEF));
 
-class CardItem extends StatelessWidget {
+
+class HorizontalMoreList extends StatelessWidget {
+  const HorizontalMoreList(
+      {Key? key,
+        this.title = 'Title',
+        this.explore,
+        required this.section,
+        this.itemHeight = 250,
+        this.cardShape = const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(4)))})
+      : super(key: key);
+
+  void _handleTap(BuildContext context, GlobalKey parentKey) {
+    /*Navigator.of(context).push(MorpheusPageRoute(
+      builder: (context) => ExploreOutfits(),
+      parentKey: parentKey,
+    ));*/
+/*    pushNewScreen(context,
+        screen: FilteredOutfitsFrontLayer(subheaderTitle: "Titolo",),
+        withNavBar: true,
+        pageTransitionAnimation: PageTransitionAnimation.cupertino);*/
+  }
+
+  final bool isLoading = false;
+  final double itemHeight;
+  final ShapeBorder cardShape;
+  final String title;
+  final ExploreModel? explore;
+  final Section section;
+
+  @override
+  Widget build(BuildContext context) {
+    final _parentKey = GlobalKey();
+    return Padding(
+      padding: const EdgeInsets.only(left: 8.0),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(title),
+              TextButton(
+                style: ButtonStyle(
+                    overlayColor: MaterialStateProperty.all(const Color(0xFFFDCDA2)),
+                    foregroundColor:
+                    MaterialStateProperty.all(const Color(0xFFA4626D))),
+                onPressed: () {
+                  explore?.showScreen(1);
+                },
+                child: Row(
+                  children: const [Text("Vedi Tutti"), Icon(Icons.arrow_forward_ios)],
+                ),
+              ),
+            ],
+          ),
+          SizedBox(
+            height: itemHeight,
+            child: GridView.builder(
+              scrollDirection: Axis.horizontal,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                childAspectRatio: 1.5,
+                crossAxisCount: 1,
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 8,
+              ),
+              itemBuilder: (context, index) {
+                if (explore!.isLoading) {
+                  return buildCardShimmer();
+                } else {
+                  return InkWell(
+                    child: Card(
+                      shape: cardShape,
+                      //clipBehavior: Clip.hardEdge,
+                      child: Image.file(
+                        //TODO: implement dynamic loading
+                        File(explore?.exploreMap[section]?[index].imgPath
+                        as String),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    onTap: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => Outfit(
+                              outfit: explore?.exploreMap[section]
+                                  ?.elementAt(index) as OutfitModel)));
+                    },
+                  );
+                }
+              },
+              itemCount: explore!.isLoading
+                  ? 4
+                  : (explore?.exploreMap[section]?.length as int > 4
+                  ? 4
+                  : explore?.exploreMap[section]?.length),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+/*class CardItem extends StatelessWidget {
   const CardItem({Key? key}) : super(key: key);
 
   @override
@@ -53,10 +157,10 @@ class CardItem extends StatelessWidget {
       child: InkWell(
         splashColor: Colors.blue.withAlpha(30),
         onTap: () {
-          /*Navigator.push(
+          *//*Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => CardExtended()),
-        );*/
+        );*//*
           debugPrint('Card tapped.');
         },
         child: Column(
@@ -71,7 +175,7 @@ class CardItem extends StatelessWidget {
               ),
               flex: 8,
             ),
-            Expanded(
+            const Expanded(
               child: Text("Nome prodotto"),
               flex: 2,
             ),
@@ -80,10 +184,11 @@ class CardItem extends StatelessWidget {
       ),
     );
   }
-}
+}*/
 
 class FullScreenImage extends StatelessWidget {
-  FullScreenImage({
+
+  const FullScreenImage({
     Key? key,
     required this.image,
     required this.tag,
@@ -106,7 +211,7 @@ class FullScreenImage extends StatelessWidget {
               )),
               Material(
                 child: InkWell(
-                  child: Icon(
+                  child: const Icon(
                     Icons.close,
                     size: 48,
                   ),
@@ -144,7 +249,7 @@ class MultiSelectColorField extends FormField<List<MultiSelectItem>>{
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      Text(text, style: TextStyle(color: Color(0xFFFDCDA2))),
+                      Text(text, style: const TextStyle(color: Color(0xFFFDCDA2))),
                       const Icon(Icons.add, color: Color(0xFFA4626D)),
                     ],
                   )
@@ -176,8 +281,8 @@ class MultiSelectColorField extends FormField<List<MultiSelectItem>>{
             MultiSelectChipDisplay(
               scroll: true,
               items: state.value,
-              textStyle: TextStyle(color: Colors.black54),
-              icon: Icon(Icons.close),
+              textStyle: const TextStyle(color: Colors.black54),
+              icon: const Icon(Icons.close),
               colorator: (value){
                 return Color(value as int).withOpacity(0.5);
               },
@@ -227,7 +332,7 @@ class ColorFormField extends FormField<Color> {
                         decoration: InputDecoration(
                           hintStyle: TextStyle(color: textColor),
                           hintText: text,
-                          border: OutlineInputBorder(
+                          border: const OutlineInputBorder(
                             borderSide: BorderSide.none,
                           ),
                         ),
@@ -236,7 +341,7 @@ class ColorFormField extends FormField<Color> {
                     Expanded(
                         flex: 2,
                         child: ActionChip(
-                          label: Icon(Icons.add),
+                          label: const Icon(Icons.add),
                           onPressed: () async {
                             var inputCol = await showColorPickerDialog(
                               state.context,
@@ -287,7 +392,7 @@ class SwitchFormField extends FormField<bool> {
                 children: [
                   title,
                   Switch(
-                    activeColor: Color(0xFFA4626D),
+                    activeColor: const Color(0xFFA4626D),
                     value: state.value as bool,
                     onChanged: (value) {
                       state.didChange(value);
@@ -302,11 +407,11 @@ class SwitchFormField extends FormField<bool> {
 }
 
 class OutfitCard extends StatelessWidget {
-  OutfitCard({Key? key, required this.index, required this.outfitsInterface, required this.section}) : super(key: key);
+  const OutfitCard({Key? key, required this.index, required this.outfitsInterface, required this.section}) : super(key: key);
 
-  int index;
-  Section section;
-  OutfitsInterface outfitsInterface;
+  final int index;
+  final Section section;
+  final OutfitsInterface outfitsInterface;
 
   void _handleTap(BuildContext context, GlobalKey parentKey) {
     Navigator.of(context).push(MorpheusPageRoute(
@@ -325,7 +430,7 @@ class OutfitCard extends StatelessWidget {
       key: _parentKey,
       onTap: () => _handleTap(context, _parentKey),
       child: Card(
-        clipBehavior: Clip.hardEdge,
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -378,7 +483,7 @@ class OutfitCard extends StatelessWidget {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     InkWell(
-                                      child:  ListTile(
+                                      child:  const ListTile(
                                         leading: Icon(Icons.delete),
                                         title: Text("Elimina Outfit"),
                                       ),
@@ -387,7 +492,7 @@ class OutfitCard extends StatelessWidget {
                                             context: context,
                                             builder: (context) {
                                               return AlertDialog(
-                                                content: Text(
+                                                content: const Text(
                                                     "Sei sicuro di voler eliminare questo articolo?"),
                                                 actions: <Widget>[
                                                   TextButton(
@@ -420,7 +525,7 @@ class OutfitCard extends StatelessWidget {
                                       },
                                     ),
                                     InkWell(
-                                      child: ListTile(
+                                      child: const ListTile(
                                           leading: Icon(Icons.edit),
                                           title: Text("Modifica Outfit")),
                                       onTap: () {},

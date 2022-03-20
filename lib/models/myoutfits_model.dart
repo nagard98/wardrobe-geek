@@ -5,7 +5,6 @@ import 'package:esempio/models/explore_model.dart';
 import 'package:esempio/models/outfit_model.dart';
 import 'package:esempio/models/outfits_interface.dart';
 import 'package:esempio/models/profile_model.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:esempio/common/utils.dart';
 
@@ -16,30 +15,35 @@ class MyOutfitsModel extends ChangeNotifier implements OutfitsInterface{
   bool isEditing = false;
   Map<Filter,List> filters = {};
 
+  @override
   void filter(OutfitDBWorker outfitDBWorker, ProfileModel profile) async {
     isLoading = true;
-    await Future.delayed(Duration(milliseconds: 400), () {});
+    await Future.delayed(const Duration(milliseconds: 400), () {});
     outfits = (await outfitDBWorker.getAll(profile.id as int, filters: filters))?.cast<OutfitModel>();
     isLoading = false;
     notifyListeners();
   }
 
+  @override
   bool addOutfit(OutfitModel outfitModel){
     //TODO: implementa aggiunta outfit
     throw UnimplementedError();
   }
 
+  @override
   void removeOutfit(OutfitDBWorker outfitDBWorker, int idOutfit, ProfileModel profile) async{
     await outfitDBWorker.delete(idOutfit);
     loadOutfits(outfitDBWorker, profile);
   }
 
+  @override
   void updateOutfit(OutfitDBWorker outfitDBWorker, OutfitModel outfitModel, ProfileModel profile,
       {bool withReload = true}) async{
     await outfitDBWorker.update(outfitModel, profile.id!);
     if(withReload) loadOutfits(outfitDBWorker, profile);
   }
 
+  @override
   void loadOutfits(OutfitDBWorker outfitDBWorker, ProfileModel profile) async {
     isLoading = true;
     await Future.delayed(const Duration(milliseconds: 500), () {});

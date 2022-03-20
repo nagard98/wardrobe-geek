@@ -1,6 +1,5 @@
 import 'dart:io' as io;
 import 'package:esempio/models/article_model.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'screens/explore_home.dart';
@@ -25,7 +24,7 @@ void main() async {
   await io.Directory(join(docsDir.path, 'outfits')).create();
   SystemUiOverlayStyle mySystemTheme= SystemUiOverlayStyle.light.copyWith(systemNavigationBarColor: Colors.white);
   SystemChrome.setSystemUIOverlayStyle(mySystemTheme);
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -44,8 +43,8 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           brightness: Brightness.light,
-          primaryColor: Color(0xFF425C5A),
-          appBarTheme: AppBarTheme(backgroundColor: Color(0xFF425C5A)),
+          primaryColor: const Color(0xFF425C5A),
+          appBarTheme: const AppBarTheme(backgroundColor: Color(0xFF425C5A)),
           fontFamily: 'Montserrat',
           //accentColor: Color(0xFFFF5963),
 
@@ -57,11 +56,11 @@ class MyApp extends StatelessWidget {
             headline6: TextStyle(fontSize: 26.0, fontWeight: FontWeight.w600),
             bodyText2: TextStyle(fontSize: 14.0, fontFamily: 'Hind'),
           ).apply(
-            bodyColor: Color(0xFF425C5A),
-            displayColor: Color(0xFF425C5A),
+            bodyColor: const Color(0xFF425C5A),
+            displayColor: const Color(0xFF425C5A),
           ),
         ),
-        home: BaseRoute(),
+        home: const BaseRoute(),
       ),
     );
   }
@@ -88,6 +87,8 @@ class BackdropModel extends ChangeNotifier {
 }
 
 class BaseRoute extends StatefulWidget{
+  const BaseRoute({Key? key}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() {
     return BaseRouteState();
@@ -97,47 +98,56 @@ class BaseRoute extends StatefulWidget{
 
 class BaseRouteState extends State<BaseRoute> with TickerProviderStateMixin{
 
-  late AnimationController controller;
+  late AnimationController controllerWardrobe;
+  late AnimationController controllerMyOutfits;
+  late AnimationController controllerExplore;
+  late AnimationController controllerProfile;
+  late List<AnimationController> animControllers;
   late List<Widget> screens;
   late int lastNavIndex;
 
   @override
   void initState(){
     lastNavIndex = 0;
-    controller = AnimationController(vsync: this, duration: Duration(milliseconds: 350));
-    screens = [Wardrobe(controller: controller,), MyOutfits(controller: controller,), Explore(controller: controller,), Profile(controller: controller,)];
+    controllerWardrobe = AnimationController(vsync: this, duration: const Duration(milliseconds: 350));
+    controllerMyOutfits = AnimationController(vsync: this, duration: const Duration(milliseconds: 350));
+    controllerExplore = AnimationController(vsync: this, duration: const Duration(milliseconds: 350));
+    controllerProfile = AnimationController(vsync: this, duration: const Duration(milliseconds: 350));
+    animControllers = [controllerWardrobe, controllerMyOutfits, controllerExplore, controllerProfile];
+    screens = [Wardrobe(controller: controllerWardrobe,), MyOutfits(controller: controllerMyOutfits,), Explore(controller: controllerExplore,), Profile(controller: controllerProfile,)];
     super.initState();
   }
 
   List<PersistentBottomNavBarItem> _navBarsItems() {
     return [
       PersistentBottomNavBarItem(
-        icon: Icon(Icons.home),
+        icon: const Icon(Icons.home),
         title: ("Wardrobe"),
-        activeColorPrimary: Color(0xFFFDCDA2),
-        inactiveColorPrimary: Color(0xFF425C5A),
+        activeColorPrimary: const Color(0xFFFDCDA2),
+        inactiveColorPrimary: const Color(0xFF425C5A),
       ),
       PersistentBottomNavBarItem(
-        icon: Icon(Icons.architecture),
+        icon: const Icon(Icons.architecture),
         title: ("MyOutfits"),
-        activeColorPrimary: Color(0xFFFDCDA2),
-        inactiveColorPrimary: Color(0xFF425C5A),
+        activeColorPrimary: const Color(0xFFFDCDA2),
+        inactiveColorPrimary: const Color(0xFF425C5A),
       ),
       PersistentBottomNavBarItem(
-        icon: Icon(Icons.explore),
+        icon: const Icon(Icons.explore),
         title: ("Explore"),
-        activeColorPrimary: Color(0xFFFDCDA2),
-        inactiveColorPrimary: Color(0xFF425C5A),
+        activeColorPrimary: const Color(0xFFFDCDA2),
+        inactiveColorPrimary: const Color(0xFF425C5A),
       ),
       PersistentBottomNavBarItem(
-        icon: Icon(Icons.person),
+        icon: const Icon(Icons.person),
         title: ("Profile"),
-        activeColorPrimary: Color(0xFFFDCDA2),
-        inactiveColorPrimary: Color(0xFF425C5A),
+        activeColorPrimary: const Color(0xFFFDCDA2),
+        inactiveColorPrimary: const Color(0xFF425C5A),
       ),
     ];
   }
 
+  @override
   Widget build(BuildContext context) {
     return PersistentTabView(
       context,
@@ -146,8 +156,8 @@ class BaseRouteState extends State<BaseRoute> with TickerProviderStateMixin{
       onItemSelected: (index){
         log('Index Navigazione: ${index.toString()}');
         if(lastNavIndex != index){
-          controller.reset();
-          controller.forward();
+          animControllers[index].reset();
+          animControllers[index].forward();
         }
         lastNavIndex = index;
         log(clothing.toString());
@@ -158,7 +168,7 @@ class BaseRouteState extends State<BaseRoute> with TickerProviderStateMixin{
       resizeToAvoidBottomInset: true,
       stateManagement: true,
       hideNavigationBarWhenKeyboardShows: true,
-      decoration: NavBarDecoration( colorBehindNavBar: Colors.white, ),
+      decoration: const NavBarDecoration( colorBehindNavBar: Colors.white, ),
       popAllScreensOnTapOfSelectedTab: true,
       popActionScreens: PopActionScreensType.all,
       itemAnimationProperties: const ItemAnimationProperties(
