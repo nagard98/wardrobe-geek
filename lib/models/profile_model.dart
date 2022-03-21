@@ -1,28 +1,35 @@
+import 'package:esempio/db/outfit_db_worker.dart';
 import 'package:flutter/widgets.dart';
 
-class ProfileModel extends ChangeNotifier{
-  String username;
+class ProfileModel {
+  //String username;
+  String email;
+  String password;
   int? id;
-  String? nome;
-  String? cognome;
-  String? citta;
-  String? nazione;
+  String name;
+  String surname;
+  String? city;
+  String? nation;
   int? numFollower;
   int? numFollowing;
-  int? livello;
-  Image? profilePicture;
+  int level;
+  String? pathPicture;
 
   ProfileModel(
-      {required this.username,
+      {//required this.username,
+      required this.email,
+      required this.password,
       this.id,
-      this.nome,
-      this.cognome,
-      this.citta,
-      this.nazione,
+      required this.name,
+      required this.surname,
+      this.city,
+      this.nation,
       this.numFollower,
       this.numFollowing,
-      this.livello,
-      this.profilePicture});
+      required this.level,
+      this.pathPicture}){
+   OutfitDBWorker.outfitDBWorker.updateDatabase();
+  }
 }
 
-ProfileModel profile = ProfileModel(username: "Naagard", id: 1);
+//ProfileModel profile = ProfileModel(id: 1);
