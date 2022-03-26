@@ -1,6 +1,7 @@
 import 'package:esempio/db/outfit_db_worker.dart';
 import 'package:esempio/models/myoutfits_model.dart';
 import 'package:esempio/models/outfit_model.dart';
+import 'package:esempio/models/your_account_model.dart';
 import 'package:flutter/material.dart';
 import 'package:backdrop/backdrop.dart';
 import 'package:esempio/common/utils.dart';
@@ -29,7 +30,8 @@ class MyOutfits extends StatelessWidget {
             frontLayerBackgroundColor: const Color(0xFF425C5A),
             stickyFrontLayer: true,
             appBar: MyOutfitsAppBar(scrollController),
-            frontLayer: MyOutfitsFrontLayer(controller: controller, scrollController: scrollController),
+            frontLayer: MyOutfitsFrontLayer(
+                controller: controller, scrollController: scrollController),
             backLayer: const MyOutfitsBackLayer(),
             floatingActionButton: const MyOutfitsFAB(),
           ),
@@ -46,13 +48,13 @@ class MyOutfitsFAB extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<MyOutfitsModel>(builder: (context, myoutfits, child) {
       return FloatingActionButton(
+        heroTag: 'addOutfit',
           child: const Icon(Icons.add),
           backgroundColor: const Color(0xFF683D49),
           foregroundColor: const Color(0xFFFDCDA2),
           onPressed: () {
-            myoutfits.currentOutfit = OutfitModel();
             Navigator.push(context, MaterialPageRoute(builder: (context) {
-              return const NuovoOutfit();
+              return NuovoOutfit();
             }));
           });
     });
@@ -81,14 +83,13 @@ class MyOutfitsAppBar extends BackdropAppBar {
   }
 }
 
-class MyOutfitsBackLayer extends StatefulWidget{
+class MyOutfitsBackLayer extends StatefulWidget {
   const MyOutfitsBackLayer({Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
     return MyOutfitsBackLayerState();
   }
-
 }
 
 class MyOutfitsBackLayerState extends State<MyOutfitsBackLayer> {
@@ -111,7 +112,8 @@ class MyOutfitsBackLayerState extends State<MyOutfitsBackLayer> {
     _formKey.currentState!.save();
     //TODO: Add validation to input
 
-    myOutfitsModel.filter(OutfitDBWorker.outfitDBWorker, profile);
+    myOutfitsModel.filter(
+        OutfitDBWorker.outfitDBWorker, personalProfile.myProfile);
 
     Backdrop.of(context).concealBackLayer();
     ScaffoldMessenger.of(context)
@@ -139,7 +141,7 @@ class MyOutfitsBackLayerState extends State<MyOutfitsBackLayer> {
                   ),
                   onSaved: (state) {
                     myOutfitsModel.filters[Filter.favorite] =
-                    (state ?? false) ? [1] : [];
+                        (state ?? false) ? [1] : [];
                   },
                 ),
                 const Divider(
@@ -220,11 +222,11 @@ class MyOutfitsBackLayerState extends State<MyOutfitsBackLayer> {
                     Expanded(
                       child: ElevatedButton(
                         style: ButtonStyle(
-                            foregroundColor:
-                            MaterialStateProperty.all(const Color(0xFFFDCDA2)),
-                            backgroundColor:
-                            MaterialStateProperty.all(const Color(0xFF76454E))),
-                        child: const Text("Filtra Articoli"),
+                            foregroundColor: MaterialStateProperty.all(
+                                const Color(0xFFFDCDA2)),
+                            backgroundColor: MaterialStateProperty.all(
+                                const Color(0xFF76454E))),
+                        child: const Text("Filtra I Miei Outfits"),
                         onPressed: () {
                           _save(context);
                         },
@@ -243,7 +245,9 @@ class MyOutfitsBackLayerState extends State<MyOutfitsBackLayer> {
 }
 
 class MyOutfitsFrontLayer extends StatefulWidget {
-  const MyOutfitsFrontLayer({Key? key, required this.controller, required this.scrollController}) : super(key: key);
+  const MyOutfitsFrontLayer(
+      {Key? key, required this.controller, required this.scrollController})
+      : super(key: key);
 
   final AnimationController controller;
   final ScrollController scrollController;
@@ -254,8 +258,7 @@ class MyOutfitsFrontLayer extends StatefulWidget {
   }
 }
 
-class MyOutfitsFrontLayerState extends State<MyOutfitsFrontLayer>{
-
+class MyOutfitsFrontLayerState extends State<MyOutfitsFrontLayer> {
   late Animation<double> _animationScale;
   late Animation<double> _animationOpacity;
 
@@ -264,7 +267,8 @@ class MyOutfitsFrontLayerState extends State<MyOutfitsFrontLayer>{
     super.initState();
     _animationScale = Tween(begin: 0.6, end: 1.0).animate(widget.controller);
     _animationOpacity = Tween(begin: 0.3, end: 1.0).animate(widget.controller);
-    myOutfitsModel.loadOutfits(OutfitDBWorker.outfitDBWorker, profile);
+    myOutfitsModel.loadOutfits(
+        OutfitDBWorker.outfitDBWorker, personalProfile.myProfile);
   }
 
   @override
@@ -277,9 +281,11 @@ class MyOutfitsFrontLayerState extends State<MyOutfitsFrontLayer>{
   Widget build(BuildContext context) {
     widget.controller.forward();
     return FadeTransition(
-      opacity: CurvedAnimation(curve: Curves.easeInOutCubic, parent: _animationOpacity),
+      opacity: CurvedAnimation(
+          curve: Curves.easeInOutCubic, parent: _animationOpacity),
       child: ScaleTransition(
-        scale: CurvedAnimation(curve: Curves.easeInOutCubic, parent: _animationScale),
+        scale: CurvedAnimation(
+            curve: Curves.easeInOutCubic, parent: _animationScale),
         child: Container(
           decoration: const BoxDecoration(
             color: Colors.white,
@@ -290,28 +296,33 @@ class MyOutfitsFrontLayerState extends State<MyOutfitsFrontLayer>{
             return Stack(
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(top: 52,left: 6.0, right: 6.0),
-                  child: AnimationLimiter(
-                    child: GridView.builder(
-                      controller: widget.scrollController,
-                      padding: const EdgeInsets.only(bottom: 30),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        childAspectRatio: 0.6,
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 4,
-                        mainAxisSpacing: 4,
-                      ),
-                      itemBuilder: (context, index) {
-                        if (myoutfits.isLoading) {
-                          return buildCardShimmer();
-                        } else {
-                          return OutfitCard(index: index, outfitsInterface: myoutfits, section: Section.filteredOutf,);
-                        }
-                      },
-                      itemCount:
-                          myoutfits.isLoading ? 8 : myoutfits.outfits?.length,
+                  padding:
+                      const EdgeInsets.only(top: 52, left: 6.0, right: 6.0),
+                  child: GridView.builder(
+                    controller: widget.scrollController,
+                    padding: const EdgeInsets.only(bottom: kToolbarHeight + 10),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      childAspectRatio: 0.6,
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 4,
+                      mainAxisSpacing: 4,
                     ),
+                    itemBuilder: (context, index) {
+                      if (myoutfits.isLoading) {
+                        return buildCardShimmer();
+                      } else {
+                        return OutfitCard(
+                          index: index,
+                          outfitsInterface: myoutfits,
+                          section: Section.myoutfits,
+                          heroTag: "myoutfit$index",
+                          isEditable: true,
+                        );
+                      }
+                    },
+                    itemCount:
+                        myoutfits.isLoading ? 8 : myoutfits.outfits?.length,
                   ),
                 ),
                 const BackdropSubHeader(

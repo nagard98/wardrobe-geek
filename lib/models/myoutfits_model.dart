@@ -5,6 +5,7 @@ import 'package:esempio/models/explore_model.dart';
 import 'package:esempio/models/outfit_model.dart';
 import 'package:esempio/models/outfits_interface.dart';
 import 'package:esempio/models/profile_model.dart';
+import 'package:esempio/models/your_account_model.dart';
 import 'package:flutter/material.dart';
 import 'package:esempio/common/utils.dart';
 
@@ -19,13 +20,13 @@ class MyOutfitsModel extends ChangeNotifier implements OutfitsInterface{
   void filter(OutfitDBWorker outfitDBWorker, ProfileModel profile) async {
     isLoading = true;
     await Future.delayed(const Duration(milliseconds: 400), () {});
-    outfits = (await outfitDBWorker.getAll(profile.id as int, filters: filters))?.cast<OutfitModel>();
+    outfits = (await outfitDBWorker.getAll(profile.id as int, filters: filters)).cast<OutfitModel>();
     isLoading = false;
     notifyListeners();
   }
 
   @override
-  bool addOutfit(OutfitModel outfitModel){
+  void addOutfit(OutfitDBWorker outfitDBWorker, OutfitModel outfitModel, ProfileModel profile){
     //TODO: implementa aggiunta outfit
     throw UnimplementedError();
   }
@@ -34,6 +35,11 @@ class MyOutfitsModel extends ChangeNotifier implements OutfitsInterface{
   void removeOutfit(OutfitDBWorker outfitDBWorker, int idOutfit, ProfileModel profile) async{
     await outfitDBWorker.delete(idOutfit);
     loadOutfits(outfitDBWorker, profile);
+  }
+
+  getOutfit(OutfitDBWorker outfitDBWorker,int idOutfit) async{
+    OutfitModel outfit = await outfitDBWorker.get(idOutfit, personalProfile.myProfile.id!);
+    return outfit;
   }
 
   @override
@@ -47,7 +53,7 @@ class MyOutfitsModel extends ChangeNotifier implements OutfitsInterface{
   void loadOutfits(OutfitDBWorker outfitDBWorker, ProfileModel profile) async {
     isLoading = true;
     await Future.delayed(const Duration(milliseconds: 500), () {});
-    outfits = (await outfitDBWorker.getAll(profile.id as int))?.cast<OutfitModel>();
+    outfits = (await outfitDBWorker.getAll(profile.id as int)).cast<OutfitModel>();
     isLoading = false;
     log(isLoading.toString());
     notifyListeners();

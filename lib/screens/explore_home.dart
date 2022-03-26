@@ -1,13 +1,13 @@
 import 'dart:io';
 import 'package:esempio/db/outfit_db_worker.dart';
 import 'package:esempio/models/outfit_model.dart';
+import 'package:esempio/models/your_account_model.dart';
 import 'package:esempio/screens/outfit.dart';
 import 'package:flutter/material.dart';
 import 'package:backdrop/backdrop.dart';
 import 'package:esempio/common/utils.dart';
 import 'package:provider/provider.dart';
 import 'package:esempio/models/explore_model.dart';
-import 'package:esempio/models/profile_model.dart';
 import 'package:scroll_app_bar/scroll_app_bar.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:esempio/db/article_db_worker.dart';
@@ -21,7 +21,6 @@ class Explore extends StatelessWidget {
 
   final int currentIndex = 0;
   final AnimationController controller;
-  final scrollController = ScrollController();
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +33,7 @@ class Explore extends StatelessWidget {
             frontLayerBackgroundColor: const Color(0xFF425C5A),
             stickyFrontLayer: true,
             maintainBackLayerState: true,
-            appBar: ExploreAppBar(scrollController),
+            appBar: ExploreAppBar(),
             frontLayer:
                 Consumer<ExploreModel>(builder: (context, explore, child) {
               return PageTransitionSwitcher(
@@ -51,10 +50,10 @@ class Explore extends StatelessWidget {
                 child: IndexedStack(key: ValueKey<int>(explore.currentIndex),index: explore.currentIndex, children: [
                   ExploreFrontLayer(
                     controller: controller,
-                    scrollController: scrollController,
+                    scrollController: explore.homeScrollController,
                   ),
                   FilteredOutfitsFrontLayer(
-                      scrollController: scrollController,
+                      scrollController: explore.newPageScrollController,
                       subheaderTitle: "Filtrato")
                 ]),
               );
@@ -68,21 +67,19 @@ class Explore extends StatelessWidget {
 }
 
 class ExploreAppBar extends BackdropAppBar {
-  ExploreAppBar(this.scrollController, {Key? key}) : super(key: key);
-
-  final ScrollController scrollController;
+  ExploreAppBar({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Consumer<ExploreModel>(builder: (context, explore, child) {
       return ScrollAppBar(
         foregroundColor: const Color(0xFFFDCDA2),
-        controller: scrollController,
+        controller: explore.currentIndex == 0 ? explore.homeScrollController : explore.newPageScrollController,
         leading: explore.currentIndex > 0
             ? IconButton(
                 icon: const Icon(Icons.arrow_back),
                 onPressed: () {
-                  explore.showScreen(0);
+                  explore.showScreen(0, Section.home);
                 })
             : null,
         elevation: 0,
@@ -174,11 +171,11 @@ class ExploreBackLayerUserState extends State<ExploreBackLayerUser>
     _userFormKey.currentState!.save();
     //TODO: Add validation to input
 
-    wardrobeModel.filter(ArticleDBWorker.articleDBWorker, profile);
+    wardrobeModel.filter(ArticleDBWorker.articleDBWorker, personalProfile.myProfile);
 
     Backdrop.of(context).concealBackLayer();
     ScaffoldMessenger.of(context)
-        .showSnackBar(const SnackBar(content: Text("Filtrato con successo")));
+        .showSnackBar(const SnackBar(content: Text("Utenti Filtrati con successo")));
   }
 
   @override
@@ -345,6 +342,14 @@ class ExploreBackLayerOutfitState extends State<ExploreBackLayerOutfit>
     return items;
   }
 
+  List<DropdownMenuItem<int>> _dropdownFromMap(Map<int,String> map){
+    List<DropdownMenuItem<int>> items=[];
+    map.forEach((key, value) {
+      items.add(DropdownMenuItem(value: key,child: Text(value.toString())));
+    });
+    return items;
+  }
+
   List _selectedSeasons = [];
   List _selectedDressCodes = [];
 
@@ -352,11 +357,11 @@ class ExploreBackLayerOutfitState extends State<ExploreBackLayerOutfit>
     _outfitFormKey.currentState!.save();
     //TODO: Add validation to input
 
-    exploreModel.filterOutfits(OutfitDBWorker.outfitDBWorker, profile);
+    exploreModel.filterOutfits(OutfitDBWorker.outfitDBWorker, personalProfile.myProfile);
 
     Backdrop.of(context).concealBackLayer();
     ScaffoldMessenger.of(context)
-        .showSnackBar(const SnackBar(content: Text("Filtrato con successo")));
+        .showSnackBar(const SnackBar(content: Text("Outfit filtrati con successo")));
   }
 
   @override
@@ -386,6 +391,9 @@ class ExploreBackLayerOutfitState extends State<ExploreBackLayerOutfit>
                             thickness: 2,
                             height: 5,
                           ),*/
+              DropdownButtonFormField<int>(items: _dropdownFromMap(orderFilters), onChanged: (item){}, onSaved: (item){
+                exploreModel.filterOrder = Order.values[item!];
+              },),
                 MultiSelectDialogField(
                   buttonText: const Text(
                     "Stagione",
@@ -465,6 +473,7 @@ class ExploreBackLayerOutfitState extends State<ExploreBackLayerOutfit>
                                 MaterialStateProperty.all(const Color(0xFF76454E))),
                         child: const Text("Filtra Articoli"),
                         onPressed: () {
+                          exploreModel.showScreen(1, Section.filteredOutf);
                           _save(context);
                         },
                       ),
@@ -507,7 +516,7 @@ class ExploreFrontLayerState extends State<ExploreFrontLayer> {
     super.initState();
     _animationScale = Tween(begin: 0.6, end: 1.0).animate(widget.controller);
     _animationOpacity = Tween(begin: 0.3, end: 1.0).animate(widget.controller);
-    exploreModel.loadData(OutfitDBWorker.outfitDBWorker, profile);
+    exploreModel.loadData(OutfitDBWorker.outfitDBWorker, personalProfile.myProfile);
   }
 
   @override
@@ -531,52 +540,6 @@ class ExploreFrontLayerState extends State<ExploreFrontLayer> {
           ),
           child: Consumer<ExploreModel>(
             builder: (context, explore, child) {
-              if (explore.isFilteredOutfits) {
-                return Container(
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(16),
-                        topRight: Radius.circular(16)),
-                  ),
-                  child: Stack(
-                    children: [
-                      Padding(
-                        padding:
-                            const EdgeInsets.only(top: 52, left: 6.0, right: 6.0),
-                        child: GridView.builder(
-                          controller: widget.scrollController,
-                          padding: const EdgeInsets.only(bottom: 30),
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                            childAspectRatio: 0.6,
-                            crossAxisCount: 2,
-                            crossAxisSpacing: 4,
-                            mainAxisSpacing: 4,
-                          ),
-                          itemBuilder: (context, index) {
-                            if (explore.isLoading) {
-                              return buildCardShimmer();
-                            } else {
-                              return OutfitCard(
-                                  index: index,
-                                  outfitsInterface: explore,
-                                  section: Section.filteredOutf);
-                            }
-                          },
-                          itemCount: explore.isLoading
-                              ? 8
-                              : explore
-                                  .exploreMap[Section.filteredOutf]?.length,
-                        ),
-                      ),
-                      const BackdropSubHeader(
-                        title: Text("I Miei Outfit"),
-                      ),
-                    ],
-                  ),
-                );
-              } else {
                 return Stack(
                   children: [
                     Container(
@@ -587,7 +550,7 @@ class ExploreFrontLayerState extends State<ExploreFrontLayer> {
                           Column(
                             children: [
                               HorizontalMoreList(
-                                explore: explore,
+                                explore2: explore,
                                 section: Section.recOutf,
                                 cardShape: const RoundedRectangleBorder(),
                                 title: "Consigliati per Te",
@@ -596,7 +559,7 @@ class ExploreFrontLayerState extends State<ExploreFrontLayer> {
                                 height: 30,
                               ),
                               HorizontalMoreList(
-                                explore: explore,
+                                explore2: explore,
                                 section: Section.newHotOutf,
                                 cardShape: const RoundedRectangleBorder(),
                                 title: "Nuovi di Tendenza",
@@ -606,7 +569,7 @@ class ExploreFrontLayerState extends State<ExploreFrontLayer> {
                               ),
                               HorizontalMoreList(
                                 section: Section.popOutf,
-                                explore: explore,
+                                explore2: explore,
                                 cardShape: const RoundedRectangleBorder(),
                                 title: "I Più Popolari",
                               ),
@@ -615,11 +578,12 @@ class ExploreFrontLayerState extends State<ExploreFrontLayer> {
                               ),
                               HorizontalMoreList(
                                 section: Section.popUsers,
-                                explore: explore,
+                                explore2: explore,
                                 title: "I Migliori Designer",
                                 cardShape: const CircleBorder(),
                                 itemHeight: 150,
                               ),
+                              const SizedBox(height: kToolbarHeight,)
                             ],
                           ),
                         ],
@@ -630,7 +594,6 @@ class ExploreFrontLayerState extends State<ExploreFrontLayer> {
                     ),
                   ],
                 );
-              }
             },
           ),
         ),

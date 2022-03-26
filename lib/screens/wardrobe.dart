@@ -14,30 +14,31 @@ import 'package:like_button/like_button.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart' as mbs;
 import 'package:scroll_app_bar/scroll_app_bar.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
+import 'package:esempio/models/your_account_model.dart';
+import 'package:persistent_bottom_nav_bar_v2/persistent-tab-view.dart';
+import 'package:esempio/screens/wardrobe_select.dart';
 
 class Wardrobe extends StatelessWidget {
-  Wardrobe({Key? key, required this.controller}) : super(key: key);
+  Wardrobe({Key? key, required this.controller, this.isSelectionMode=false}) : super(key: key);
 
   final AnimationController controller;
   final scrollController = ScrollController();
+  final bool isSelectionMode;
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<WardrobeModel>.value(
-      value: wardrobeModel,
-      child: Container(
-        color: const Color(0xFF425C5A),
-        child: SafeArea(
-          child: BackdropScaffold(
-            maintainBackLayerState: true,
-            frontLayerBackgroundColor: const Color(0xFF486563),
-            stickyFrontLayer: true,
-            appBar: WardrobeAppBar(scrollController),
-            frontLayer: WardrobeFrontLayer(
-                controller: controller, scrollController: scrollController),
-            backLayer: const WardrobeBackLayer(),
-            floatingActionButton: const WardrobeFAB(),
-          ),
+    return Container(
+      color: const Color(0xFF425C5A),
+      child: SafeArea(
+        child: BackdropScaffold(
+          maintainBackLayerState: true,
+          frontLayerBackgroundColor: const Color(0xFF486563),
+          stickyFrontLayer: true,
+          appBar: WardrobeAppBar(scrollController),
+          frontLayer: WardrobeFrontLayer(
+              controller: controller, scrollController: scrollController, isSelectionMode: isSelectionMode),
+          backLayer: const WardrobeBackLayer(),
+          floatingActionButton: const WardrobeFAB(),
         ),
       ),
     );
@@ -51,6 +52,7 @@ class WardrobeFAB extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<WardrobeModel>(builder: (context, wardrobe, child) {
       return FloatingActionButton(
+          heroTag: 'addArticle',
           backgroundColor: const Color(0xFFA4626D),
           foregroundColor: const Color(0xFFFDCDA2),
           child: const Icon(Icons.add),
@@ -58,7 +60,7 @@ class WardrobeFAB extends StatelessWidget {
             wardrobe.currentArticle = ArticleModel();
             Navigator.push(context, MaterialPageRoute(builder: (context) {
               //TODO: Correggi crash sporadico aggiunta immagine(scomparso?)
-              return const NuovoArticolo();
+              return NuovoArticolo();
             }));
           });
     });
@@ -116,7 +118,8 @@ class WardrobeBackLayerState extends State<WardrobeBackLayer> {
     _formKey.currentState!.save();
     //TODO: Add validation to input
 
-    wardrobeModel.filter(ArticleDBWorker.articleDBWorker, profile);
+    wardrobeModel.filter(
+        ArticleDBWorker.articleDBWorker, personalProfile.myProfile);
 
     Backdrop.of(context).concealBackLayer();
     ScaffoldMessenger.of(context)
@@ -226,7 +229,7 @@ class WardrobeBackLayerState extends State<WardrobeBackLayer> {
                 ),
                 MultiSelectColorField(
                   text: "Colore Primario",
-                  onSaved: (value){
+                  onSaved: (value) {
                     var list = value?.map((e) => e.value).toList();
                     wardrobeModel.filters[Filter.primColor] = list!;
                   },
@@ -238,7 +241,7 @@ class WardrobeBackLayerState extends State<WardrobeBackLayer> {
                 ),
                 MultiSelectColorField(
                   text: "Colore Secondario",
-                  onSaved: (value){
+                  onSaved: (value) {
                     var list = value?.map((e) => e.value).toList();
                     wardrobeModel.filters[Filter.secColor] = list!;
                   },
@@ -249,10 +252,10 @@ class WardrobeBackLayerState extends State<WardrobeBackLayer> {
                     Expanded(
                       child: ElevatedButton(
                         style: ButtonStyle(
-                            foregroundColor:
-                                MaterialStateProperty.all(const Color(0xFFFDCDA2)),
-                            backgroundColor:
-                                MaterialStateProperty.all(const Color(0xFF76454E))),
+                            foregroundColor: MaterialStateProperty.all(
+                                const Color(0xFFFDCDA2)),
+                            backgroundColor: MaterialStateProperty.all(
+                                const Color(0xFF76454E))),
                         child: const Text("Filtra Articoli"),
                         onPressed: () {
                           _save(context);
@@ -273,11 +276,15 @@ class WardrobeBackLayerState extends State<WardrobeBackLayer> {
 
 class WardrobeFrontLayer extends StatefulWidget {
   const WardrobeFrontLayer(
-      {Key? key, required this.controller, required this.scrollController})
+      {Key? key,
+      required this.controller,
+      required this.scrollController,
+      this.isSelectionMode = false})
       : super(key: key);
 
   final AnimationController controller;
   final ScrollController scrollController;
+  final bool isSelectionMode;
 
   @override
   State<StatefulWidget> createState() {
@@ -288,13 +295,21 @@ class WardrobeFrontLayer extends StatefulWidget {
 class WardrobeFrontLayerState extends State<WardrobeFrontLayer> {
   late Animation<double> _animationScale;
   late Animation<double> _animationOpacity;
+  int optionSelected = 0;
+
+  void checkOption(int articleId) {
+    setState(() {
+      optionSelected = articleId;
+    });
+  }
 
   @override
   void initState() {
     super.initState();
     _animationScale = Tween(begin: 0.6, end: 1.0).animate(widget.controller);
     _animationOpacity = Tween(begin: 0.3, end: 1.0).animate(widget.controller);
-    wardrobeModel.loadArticles(ArticleDBWorker.articleDBWorker, profile);
+    wardrobeModel.loadArticles(
+        ArticleDBWorker.articleDBWorker, personalProfile.myProfile);
   }
 
   @override
@@ -312,51 +327,61 @@ class WardrobeFrontLayerState extends State<WardrobeFrontLayer> {
       child: ScaleTransition(
         scale: CurvedAnimation(
             parent: _animationScale, curve: Curves.easeInOutCubic),
-        child: ChangeNotifierProvider.value(
-          value: wardrobeModel,
-          child: Container(
-            decoration: const BoxDecoration(
-              color: Color(0xFFFBFBFB),
-              borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(16), topRight: Radius.circular(16)),
-            ),
-            child: Consumer<WardrobeModel>(builder: (context, wardrobe, child) {
-              log(wardrobe.articles.toString());
-              return Stack(
-                children: [
-                  Padding(
-                    padding: EdgeInsets.only(top: 52, left: 6, right: 6),
-                    child: GridView.builder(
-                      controller: widget.scrollController,
-                      padding: EdgeInsets.only(bottom: 20),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        childAspectRatio: 1.5,
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 2,
-                        mainAxisSpacing: 2,
-                      ),
-                      itemBuilder: (context, index) {
-                        if (wardrobe.isLoading) {
-                          return buildCardShimmer();
-                        } else {
-                          return ArticleCard(
-                            index: index,
-                            wardrobe: wardrobe,
-                          );
-                        }
-                      },
-                      itemCount:
-                          wardrobe.isLoading ? 8 : wardrobe.articles?.length,
-                    ),
-                  ),
-                  const BackdropSubHeader(
-                    title: Text("I Miei Articoli"),
-                  ),
-                ],
-              );
-            }),
+        child: Container(
+          decoration: const BoxDecoration(
+            color: Color(0xFFFBFBFB),
+            borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(16), topRight: Radius.circular(16)),
           ),
+          child: Consumer<WardrobeModel>(builder: (context, wardrobe, child) {
+            log(wardrobe.articles.toString());
+            return Stack(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(
+                    top: 52,
+                    left: 6,
+                    right: 6,
+                  ),
+                  child: GridView.builder(
+                    controller: widget.scrollController,
+                    padding: EdgeInsets.only(bottom: kToolbarHeight + 10),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      childAspectRatio: 1.5,
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 2,
+                      mainAxisSpacing: 2,
+                    ),
+                    itemBuilder: (context, index) {
+                      if (wardrobe.isLoading) {
+                        return buildCardShimmer();
+                      } else if (widget.isSelectionMode) {
+                        return ArticleSelectCard(
+                          index: index,
+                          wardrobe: wardrobe,
+                          onTap: () =>
+                              checkOption(wardrobe.articles?[index].id as int),
+                          isSelected: optionSelected ==
+                              (wardrobe.articles?[index].id as int),
+                        );
+                      } else {
+                        return ArticleCard(
+                          index: index,
+                          wardrobe: wardrobe,
+                        );
+                      }
+                    },
+                    itemCount:
+                        wardrobe.isLoading ? 8 : wardrobe.articles?.length,
+                  ),
+                ),
+                const BackdropSubHeader(
+                  title: Text("I Miei Articoli"),
+                ),
+              ],
+            );
+          }),
         ),
       ),
     );
@@ -364,7 +389,8 @@ class WardrobeFrontLayerState extends State<WardrobeFrontLayer> {
 }
 
 class ArticleCard extends StatelessWidget {
-  const ArticleCard({Key? key, required this.wardrobe, required this.index}) : super(key: key);
+  const ArticleCard({Key? key, required this.wardrobe, required this.index})
+      : super(key: key);
 
   final WardrobeModel wardrobe;
   final int index;
@@ -415,7 +441,7 @@ class ArticleCard extends StatelessWidget {
                       wardrobe.updateArticle(
                           ArticleDBWorker.articleDBWorker,
                           wardrobe.articles?.elementAt(index) as ArticleModel,
-                          profile,
+                          personalProfile.myProfile,
                           withReload: false);
                       return !isLiked;
                     },
@@ -458,12 +484,12 @@ class ArticleCard extends StatelessWidget {
                                       },
                                     );
                                     log("Cancellare articolo?: $toBeDeleted");
-                                    if (toBeDeleted) {
+                                    if (toBeDeleted ?? false) {
                                       wardrobe.removeArticle(
                                           ArticleDBWorker.articleDBWorker,
                                           wardrobe.articles?.elementAt(index).id
                                               as int,
-                                          profile);
+                                          personalProfile.myProfile);
                                     }
                                   },
                                   child: const ListTile(
@@ -479,7 +505,15 @@ class ArticleCard extends StatelessWidget {
                                   ),
                                 ),
                                 InkWell(
-                                  onTap: () {},
+                                  onTap: () {
+                                    //Navigator.of(context).pop();
+                                    pushNewScreen(context,
+                                        screen: EditArticolo(wardrobe.articles!
+                                            .elementAt(index)),
+                                        pageTransitionAnimation:
+                                            PageTransitionAnimation.slideUp,
+                                        withNavBar: true);
+                                  },
                                   child: const ListTile(
                                     title: Text("Modifica"),
                                     leading: Icon(Icons.edit),

@@ -17,34 +17,62 @@ class ArticleDBWorker {
 
   Future<Database?> _getDB() async {
     if (_db == null) {
-      String path = join(utils.docsDir.path, "wardrobe_geek3.db");
+      String path = join(utils.docsDir.path, "wardrobe_geek6.db");
       _db = await openDatabase(path, version: 1,
           onCreate: (Database inDB, int inVersion) async {
-        await inDB.execute('CREATE TABLE IF NOT EXISTS articles ('
-            'idArticle INTEGER PRIMARY KEY,'
-            'idUser INTEGER NOT NULL,'
-            'imgPath TEXT NOT NULL,'
-            'articleName TEXT NOT NULL,'
-            'primColor INTEGER NOT NULL,'
-            'secColor INTEGER NULL,'
-            'brand INTEGER NOT NULL,'
-            'clothingType INTEGER NOT NULL,'
-            'fav INTEGER NOT NULL)');
+            await inDB.execute('CREATE TABLE IF NOT EXISTS outfits ('
+                'idOutfit INTEGER PRIMARY KEY,'
+                'idUser INTEGER NOT NULL,'
+                'season INTEGER NOT NULL,'
+                'likes INTEGER NOT NULL,'
+                'imgPath TEXT NOT NULL,'
+                'addedOn INTEGER NOT NULL,'
+                'favorite INTEGER NOT NULL,'
+                'numWished INTEGER NOT NULL,'
+                'dressCode INTEGER NOT NULL);');
 
-        await inDB.execute('CREATE TABLE IF NOT EXISTS outfits ('
-            'idOutfit INTEGER PRIMARY KEY,'
-            'idUser INTEGER NOT NULL,'
-            'season INTEGER NOT NULL,'
-            'likes INTEGER NOT NULL,'
-            'imgPath TEXT NOT NULL,'
-            'addedOn INTEGER NOT NULL,'
-            'favorite INTEGER NOT NULL,'
-            'dressCode INTEGER NOT NULL);');
+            await inDB.execute('CREATE TABLE IF NOT EXISTS outfit_articles ('
+                'idOutfit INTEGER NOT NULL,'
+                'idArticle INTEGER NOT NULL,'
+                'PRIMARY KEY(idOutfit, idArticle) );');
 
-        await inDB.execute('CREATE TABLE IF NOT EXISTS outfit_articles ('
-            'idOutfit INTEGER NOT NULL,'
-            'idArticle INTEGER NOT NULL,'
-            'PRIMARY KEY(idOutfit, idArticle) );');
+            //TODO:Aggiungere foreign key
+            await inDB.execute('CREATE TABLE IF NOT EXISTS articles ('
+                'idArticle INTEGER PRIMARY KEY,'
+                'idUser INTEGER NOT NULL,'
+                'imgPath TEXT NOT NULL,'
+                'articleName TEXT NOT NULL,'
+                'primColor INTEGER NOT NULL,'
+                'secColor INTEGER NULL,'
+                'brand INTEGER NOT NULL,'
+                'clothingType INTEGER NOT NULL,'
+                'fav INTEGER NOT NULL);');
+
+            await inDB.execute('CREATE TABLE IF NOT EXISTS profiles ('
+                'id INTEGER PRIMARY KEY,'
+                'email TEXT NOT NULL UNIQUE,'
+                'password TEXT NOT NULL,'
+                'name TEXT NOT NULL,'
+                'surname TEXT NOT NULL,'
+                'city TEXT NULL,'
+                'nation TEXT NULL,'
+                'level INTEGER NOT NULL,'
+                'pathPicture TEXT NULL);');
+
+            await inDB.execute('CREATE TABLE IF NOT EXISTS outfit_wishlist ('
+                'idUser INTEGER NOT NULL,'
+                'idOutfit INTEGER NOT NULL,'
+                'PRIMARY KEY(idUser, idOutfit) );');
+
+            await inDB.execute('CREATE TABLE IF NOT EXISTS profile_follows ('
+                'idFollower INTEGER NOT NULL,'
+                'idFollowed INTEGER NOT NULL,'
+                'PRIMARY KEY(idFollower, idFollowed) );');
+
+            await inDB.execute('CREATE TABLE IF NOT EXISTS like_outfit ('
+                'idUser INTEGER NOT NULL,'
+                'idOutfit INTEGER NOT NULL,'
+                'PRIMARY KEY(idUser, idOutfit) );');
       });
     }
     return _db;
@@ -85,7 +113,6 @@ class ArticleDBWorker {
         await _db?.rawQuery('SELECT MAX(idArticle)+1 AS id from articles');
     int nextId = val?.first['id'] == null ? 1 : val!.first['id'] as int;
     article.id = nextId;
-    article.imgPath = join(utils.docsDir.path,'articles','${article.id}.jpg');
 
     return await _db?.rawInsert(
         'INSERT INTO articles (idArticle, idUser, imgPath, articleName, primColor, secColor, brand, clothingType, fav)'

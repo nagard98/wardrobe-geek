@@ -6,11 +6,11 @@ import 'package:esempio/models/profile_model.dart';
 abstract class OutfitsInterface {
   void filter(OutfitDBWorker outfitDBWorker, ProfileModel profile);
 
-  bool addOutfit(OutfitModel outfitModel);
+  void addOutfit(OutfitDBWorker outfitDBWorker, OutfitModel outfitModel, ProfileModel profile);
 
   void removeOutfit(OutfitDBWorker outfitDBWorker, int idOutfit, ProfileModel profile);
 
-  void updateOutfit(OutfitDBWorker outfitDBWorker, OutfitModel outfitModel, ProfileModel profile, {bool withReload});
+  void updateOutfit(OutfitDBWorker outfitDBWorker, OutfitModel outfitModel, ProfileModel profile, {bool withReload=true});
 
   void loadOutfits(OutfitDBWorker outfitDBWorker, ProfileModel profile);
 

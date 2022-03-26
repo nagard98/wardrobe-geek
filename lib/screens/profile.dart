@@ -84,13 +84,15 @@ class ProfileFrontLayerState extends State<ProfileFrontLayer> {
           SliverList(
             delegate: SliverChildBuilderDelegate(
               (context, index) {
-                if(profile.isLoggedIn){
+                if (profile.isLoggedIn) {
                   return FadeTransition(
                     opacity: CurvedAnimation(
-                        curve: Curves.easeInOutCubic, parent: _animationOpacity),
+                        curve: Curves.easeInOutCubic,
+                        parent: _animationOpacity),
                     child: ScaleTransition(
                       scale: CurvedAnimation(
-                          curve: Curves.easeInOutCubic, parent: _animationScale),
+                          curve: Curves.easeInOutCubic,
+                          parent: _animationScale),
                       child: Column(
                         children: [
                           Stack(
@@ -159,7 +161,8 @@ class ProfileFrontLayerState extends State<ProfileFrontLayer> {
                                       child: Column(
                                         children: [
                                           const Text("Followers"),
-                                          Text("${profile.myProfile.numFollower}")
+                                          Text(
+                                              "${profile.myProfile.numFollower}")
                                         ],
                                       ),
                                     ),
@@ -172,7 +175,8 @@ class ProfileFrontLayerState extends State<ProfileFrontLayer> {
                                               width: 0),
                                           borderRadius: const BorderRadius.only(
                                               topRight: Radius.circular(10),
-                                              bottomRight: Radius.circular(10))),
+                                              bottomRight:
+                                                  Radius.circular(10))),
                                       child: Column(
                                         children: [
                                           const Text("Following"),
@@ -207,35 +211,55 @@ class ProfileFrontLayerState extends State<ProfileFrontLayer> {
                       ),
                     ),
                   );
-                }else{
+                } else {
                   return Container(
-                    color: Colors.white,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.only(topRight: Radius.circular(16), topLeft: Radius.circular(16)),
+                    ),
                     padding: const EdgeInsets.fromLTRB(16, 128, 16, 0),
                     alignment: Alignment.center,
                     child: Column(
                       children: [
-                        const Text("Fai il login per accedere a tutte le funzionalità",softWrap: true,),
-                        const SizedBox(height: 10,),
+                        const Text(
+                          "Fai il login per accedere a tutte le funzionalità",
+                          softWrap: true,
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
                         ElevatedButton(
+                          style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all(
+                                  const Color(0xFFA4626D))),
                           onPressed: () {
                             pushNewScreen(context,
-                                screen: Login(), withNavBar: true, pageTransitionAnimation: PageTransitionAnimation.slideUp);
+                                screen: Login(),
+                                withNavBar: true,
+                                pageTransitionAnimation:
+                                    PageTransitionAnimation.slideUp);
                           },
                           child: const Text("Login"),
                         ),
-                        const SizedBox(height: 20,),
+                        const SizedBox(
+                          height: 20,
+                        ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             const Text("Non hai un account? "),
-                            TextButton(onPressed: (){
-                              pushNewScreen(
-                                  context,
-                                  screen: Register(),
-                                  withNavBar: true,
-                                  pageTransitionAnimation: PageTransitionAnimation.slideUp
-                              );
-                            }, child: const Text("Registrati"))
+                            TextButton(
+                                style: ButtonStyle(
+                                    foregroundColor: MaterialStateProperty.all(
+                                        const Color(0xFFA4626D))),
+                                onPressed: () {
+                                  pushNewScreen(context,
+                                      screen: Register(),
+                                      withNavBar: true,
+                                      pageTransitionAnimation:
+                                          PageTransitionAnimation.slideUp);
+                                },
+                                child: const Text("Registrati"))
                           ],
                         )
                       ],

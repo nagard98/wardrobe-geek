@@ -17,7 +17,7 @@ class ProfileDBWorker {
 
   Future<Database?> _getDB() async {
     if (_db == null) {
-      String path = join(docsDir.path, "wardrobe_geek3.db");
+      String path = join(docsDir.path, "wardrobe_geek6.db");
       _db = await openDatabase(path, version: 1,
           onCreate: (Database inDB, int inVersion) async {
             //TODO: Aggiungere foreign key

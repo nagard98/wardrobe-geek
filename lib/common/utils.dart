@@ -17,6 +17,10 @@ import 'package:modal_bottom_sheet/modal_bottom_sheet.dart' as mbs;
 import 'package:esempio/models/outfit_model.dart';
 import 'package:form_field_validator/form_field_validator.dart' as validator;
 import 'package:esempio/models/your_account_model.dart';
+import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
+
+var uuid = const Uuid();
 
 final passwordValidator = validator.MultiValidator([
   validator.RequiredValidator(errorText: 'La password è obbligatoria'),
@@ -39,6 +43,18 @@ enum Filter {
   like,
   dressCode
 }
+
+enum Order {
+  desDate,
+  ascDate,
+  desPop,
+  ascPop,
+}
+
+List<String> orderNames = ['Data Decrescente', 'Data Crescente', 'Popolarità Decrescente', 'Popolarità Crescente'];
+
+Map<int, String> orderFilters = orderNames.asMap();
+
 /*
 class CardExtended extends StatelessWidget {
   const CardExtended({Key? key}) : super(key: key);
@@ -68,7 +84,7 @@ class HorizontalMoreList extends StatelessWidget {
   const HorizontalMoreList(
       {Key? key,
       this.title = 'Title',
-      this.explore,
+      this.explore2,
       required this.section,
       this.itemHeight = 250,
       this.cardShape = const RoundedRectangleBorder(
@@ -90,7 +106,7 @@ class HorizontalMoreList extends StatelessWidget {
   final double itemHeight;
   final ShapeBorder cardShape;
   final String title;
-  final ExploreModel? explore;
+  final ExploreModel? explore2;
   final Section section;
 
   @override
@@ -111,7 +127,7 @@ class HorizontalMoreList extends StatelessWidget {
                     foregroundColor:
                         MaterialStateProperty.all(const Color(0xFFA4626D))),
                 onPressed: () {
-                  explore?.showScreen(1, section);
+                  explore2?.showScreen(1, section);
                 },
                 child: Row(
                   children: const [
@@ -122,54 +138,59 @@ class HorizontalMoreList extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(
-            height: itemHeight,
-            child: GridView.builder(
-              scrollDirection: Axis.horizontal,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                childAspectRatio: 1.5,
-                crossAxisCount: 1,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
-              ),
-              itemBuilder: (context, index) {
-                if (explore!.isLoading) {
-                  return buildCardShimmer();
-                } else {
-                  return InkWell(
-                    child: Hero(
-                      tag: "outfithome$section$index",
-                      child: Card(
-                        shape: cardShape,
-                        child: Image.file(
-                          //TODO: implement dynamic loading
-                          File(explore?.exploreMap[section]?[index].imgPath
-                              as String),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => Outfit(
-                            outfit: explore?.exploreMap[section]
-                                ?.elementAt(index) as OutfitModel,
-                            heroTag: "outfithome$section$index",
-                            section: section,
+          Consumer<ExploreModel>(
+            builder: (context, explore, child) {
+              return SizedBox(
+                height: itemHeight,
+                child: GridView.builder(
+                  scrollDirection: Axis.horizontal,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    childAspectRatio: 1.5,
+                    crossAxisCount: 1,
+                    crossAxisSpacing: 8,
+                    //TODO: valutare errore scroll extent is negative con silver grid
+                    //mainAxisSpacing: 8,
+                  ),
+                  itemBuilder: (context, index) {
+                    if (explore.isLoading) {
+                      return buildCardShimmer();
+                    } else {
+                      return InkWell(
+                        child: Hero(
+                          tag: "outfithome$section$index",
+                          child: Card(
+                            shape: cardShape,
+                            child: Image.file(
+                              //TODO: implement dynamic loading
+                              File(explore.exploreMap[section]?[index].imgPath
+                                  as String),
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         ),
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => Outfit(
+                                outfit: explore.exploreMap[section]
+                                    ?.elementAt(index) as OutfitModel,
+                                heroTag: "outfithome$section$index",
+                                section: section,
+                              ),
+                            ),
+                          );
+                        },
                       );
-                    },
-                  );
-                }
-              },
-              itemCount: explore!.isLoading
-                  ? 4
-                  : (explore?.exploreMap[section]?.length as int > 4
+                    }
+                  },
+                  itemCount: explore.isLoading
                       ? 4
-                      : explore?.exploreMap[section]?.length),
-            ),
+                      : (explore.exploreMap[section]?.length as int > 4
+                          ? 4
+                          : explore.exploreMap[section]?.length),
+                ),
+              );
+            },
           ),
         ],
       ),
@@ -308,7 +329,8 @@ class ColorFormField extends FormField<Color> {
             validator: validator,
             initialValue: initialValue,
             builder: (FormFieldState<Color> state) {
-              return DecoratedBox(
+              return Container(
+                padding: const EdgeInsets.fromLTRB(10.0, 4.0, 10.0, 4.0),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(4.0),
                   border: Border.all(color: borderColor),
@@ -316,21 +338,14 @@ class ColorFormField extends FormField<Color> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Expanded(
-                      flex: 3,
-                      child: TextField(
-                        readOnly: true,
-                        style: TextStyle(color: textColor),
-                        decoration: InputDecoration(
-                          hintStyle: TextStyle(color: textColor),
-                          hintText: text,
-                          border: const OutlineInputBorder(
-                            borderSide: BorderSide.none,
-                          ),
-                        ),
+                    Flexible(
+                      flex: 1,
+                      child: Text(
+                        text,
+                        softWrap: true,
                       ),
                     ),
-                    Expanded(
+                    Flexible(
                       flex: 2,
                       child: state.value == Colors.transparent
                           ? ActionChip(
@@ -418,21 +433,25 @@ class OutfitCard extends StatelessWidget {
       required this.index,
       required this.outfitsInterface,
       required this.section,
-      required this.heroTag})
+      required this.heroTag,
+      this.isEditable = false})
       : super(key: key);
 
   final int index;
   final Section section;
   final OutfitsInterface outfitsInterface;
   final String heroTag;
+  final bool isEditable;
 
   void _handleTap(BuildContext context, GlobalKey parentKey) {
     Navigator.of(context).push(MorpheusPageRoute(
       //TODO: Modifica Outfit
       builder: (context) => Outfit(
-          outfit: outfitsInterface.getListOutfits(section).elementAt(index),
-          heroTag: heroTag,
-          section: section),
+        outfit: outfitsInterface.getListOutfits(section).elementAt(index),
+        heroTag: heroTag,
+        section: section,
+        isEditable: isEditable,
+      ),
       parentKey: parentKey,
     ));
   }
@@ -465,6 +484,7 @@ class OutfitCard extends StatelessWidget {
             Expanded(
                 flex: 1,
                 child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     /*const Expanded(
                         flex: 2,
@@ -473,9 +493,10 @@ class OutfitCard extends StatelessWidget {
                           child: Text("TESTO"),
                         )),*/
                     section == Section.myoutfits
-                        ? Expanded(
-                            flex: 2,
+                        ? Flexible(
+                            flex: 1,
                             child: LikeButton(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
                               isLiked: outfitsInterface
                                   .getListOutfits(section)
                                   .elementAt(index)
@@ -496,11 +517,10 @@ class OutfitCard extends StatelessWidget {
                               },
                             ),
                           )
-                        : const SizedBox(),
-                    section != Section.myoutfits
-                        ? Expanded(
+                        : Flexible(
                             flex: 1,
                             child: LikeButton(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
                               isLiked: outfitsInterface
                                   .getListOutfits(section)
                                   .elementAt(index)
@@ -515,7 +535,7 @@ class OutfitCard extends StatelessWidget {
                               },
                               onTap: (isLiked) async {
                                 bool toBeDeleted;
-                                if(isLiked==true){
+                                if (isLiked == true) {
                                   toBeDeleted = await showDialog(
                                       context: context,
                                       builder: (context) {
@@ -526,8 +546,8 @@ class OutfitCard extends StatelessWidget {
                                             TextButton(
                                               child: const Text('No'),
                                               onPressed: () {
-                                                Navigator.of(context).pop(
-                                                    false);
+                                                Navigator.of(context)
+                                                    .pop(false);
                                               },
                                             ),
                                             TextButton(
@@ -541,45 +561,53 @@ class OutfitCard extends StatelessWidget {
                                       });
                                   log("Rimuovere outfit da wishlist?: $toBeDeleted");
                                   if (toBeDeleted) {
-                                    if(section == Section.wishlist) {
+                                    if (section == Section.wishlist) {
                                       wishlistModel.removeOutfit(
                                           OutfitDBWorker.outfitDBWorker,
                                           outfitsInterface
                                               .getListOutfits(section)
                                               .elementAt(index)
                                               .id!,
-                                          personalProfile.myProfile, withReload: true);
-                                    }else{
+                                          personalProfile.myProfile,
+                                          withReload: true);
+                                    } else {
                                       wishlistModel.removeOutfit(
                                           OutfitDBWorker.outfitDBWorker,
                                           outfitsInterface
                                               .getListOutfits(section)
                                               .elementAt(index)
                                               .id!,
-                                          personalProfile.myProfile, withReload: false);
+                                          personalProfile.myProfile,
+                                          withReload: false);
                                     }
                                     return !isLiked;
-                                  }else{
+                                  } else {
                                     return isLiked;
                                   }
-                                }else{
-                                  if(section==Section.wishlist){
-                                    wishlistModel.addOutfit(OutfitDBWorker.outfitDBWorker,outfitsInterface
-                                        .getListOutfits(section)
-                                        .elementAt(index) , personalProfile.myProfile, withReload: true);
-                                  }else{
-                                    wishlistModel.addOutfit(OutfitDBWorker.outfitDBWorker,outfitsInterface
-                                        .getListOutfits(section)
-                                        .elementAt(index) , personalProfile.myProfile);
+                                } else {
+                                  if (section == Section.wishlist) {
+                                    wishlistModel.addOutfit(
+                                        OutfitDBWorker.outfitDBWorker,
+                                        outfitsInterface
+                                            .getListOutfits(section)
+                                            .elementAt(index),
+                                        personalProfile.myProfile,
+                                        withReload: true);
+                                  } else {
+                                    wishlistModel.addOutfit(
+                                        OutfitDBWorker.outfitDBWorker,
+                                        outfitsInterface
+                                            .getListOutfits(section)
+                                            .elementAt(index),
+                                        personalProfile.myProfile);
                                   }
 
                                   return !isLiked;
                                 }
                               },
                             ),
-                          )
-                        : const SizedBox(),
-                    Expanded(
+                          ),
+                    Flexible(
                       flex: 1,
                       child: IconButton(
                         icon: const Icon(
@@ -653,7 +681,18 @@ class OutfitCard extends StatelessWidget {
                                                 leading: Icon(Icons.edit),
                                                 //TODO: implementa modifica outfit bottom sheet
                                                 title: Text("Modifica Outfit")),
-                                            onTap: () {},
+                                            onTap: () {
+                                              Navigator.of(context).push(
+                                                  MaterialPageRoute(
+                                                      builder: (context) {
+                                                return NuovoOutfit(
+                                                  outfitToEdit: outfitsInterface
+                                                      .getListOutfits(
+                                                          Section.myoutfits)
+                                                      .elementAt(index),
+                                                );
+                                              }));
+                                            },
                                           )
                                         : const SizedBox(),
                                     section != Section.myoutfits &&
@@ -711,22 +750,29 @@ class OutfitCard extends StatelessWidget {
                                                       });
                                               log("Rimuovere outfit da wishlist?: $toBeDeleted");
                                               if (toBeDeleted) {
-                                                if(section == Section.wishlist) {
+                                                if (section ==
+                                                    Section.wishlist) {
                                                   wishlistModel.removeOutfit(
-                                                      OutfitDBWorker.outfitDBWorker,
+                                                      OutfitDBWorker
+                                                          .outfitDBWorker,
                                                       outfitsInterface
-                                                          .getListOutfits(section)
+                                                          .getListOutfits(
+                                                              section)
                                                           .elementAt(index)
                                                           .id!,
-                                                      personalProfile.myProfile, withReload: true);
-                                                }else{
+                                                      personalProfile.myProfile,
+                                                      withReload: true);
+                                                } else {
                                                   wishlistModel.removeOutfit(
-                                                      OutfitDBWorker.outfitDBWorker,
+                                                      OutfitDBWorker
+                                                          .outfitDBWorker,
                                                       outfitsInterface
-                                                          .getListOutfits(section)
+                                                          .getListOutfits(
+                                                              section)
                                                           .elementAt(index)
                                                           .id!,
-                                                      personalProfile.myProfile, withReload: false);
+                                                      personalProfile.myProfile,
+                                                      withReload: false);
                                                 }
                                               }
                                             },

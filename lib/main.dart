@@ -1,5 +1,6 @@
 import 'dart:io' as io;
 import 'package:esempio/models/article_model.dart';
+import 'package:esempio/models/wardrobe_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'screens/explore_home.dart';
@@ -13,6 +14,7 @@ import 'package:provider/provider.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
 import 'package:persistent_bottom_nav_bar_v2/persistent-tab-view.dart';
+import 'package:esempio/models/your_account_model.dart';
 
 //TO-DO: Cambiare versione minima sdk
 
@@ -22,6 +24,7 @@ void main() async {
   utils.docsDir = docsDir;
   await io.Directory(join(docsDir.path, 'articles')).create();
   await io.Directory(join(docsDir.path, 'outfits')).create();
+  await io.Directory(join(docsDir.path, 'profiles')).create();
   SystemUiOverlayStyle mySystemTheme= SystemUiOverlayStyle.light.copyWith(systemNavigationBarColor: Colors.white);
   SystemChrome.setSystemUIOverlayStyle(mySystemTheme);
   runApp(const MyApp());
@@ -37,7 +40,9 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider<BaseModel>(
             create: (BuildContext context) => BaseModel()),
         ChangeNotifierProvider<BackdropModel>(
-            create: (BuildContext context) => BackdropModel())
+            create: (BuildContext context) => BackdropModel()),
+        ChangeNotifierProvider<PersonalAccount>.value(value: personalProfile),
+        ChangeNotifierProvider<WardrobeModel>.value(value: wardrobeModel)
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -101,6 +106,7 @@ class BaseRouteState extends State<BaseRoute> with TickerProviderStateMixin{
   late AnimationController controllerWardrobe;
   late AnimationController controllerMyOutfits;
   late AnimationController controllerExplore;
+  late AnimationController controllerWishlist;
   late AnimationController controllerProfile;
   late List<AnimationController> animControllers;
   late List<Widget> screens;
@@ -112,9 +118,10 @@ class BaseRouteState extends State<BaseRoute> with TickerProviderStateMixin{
     controllerWardrobe = AnimationController(vsync: this, duration: const Duration(milliseconds: 350));
     controllerMyOutfits = AnimationController(vsync: this, duration: const Duration(milliseconds: 350));
     controllerExplore = AnimationController(vsync: this, duration: const Duration(milliseconds: 350));
+    controllerWishlist = AnimationController(vsync: this, duration: const Duration(milliseconds: 350));
     controllerProfile = AnimationController(vsync: this, duration: const Duration(milliseconds: 350));
-    animControllers = [controllerWardrobe, controllerMyOutfits, controllerExplore, controllerProfile];
-    screens = [Wardrobe(controller: controllerWardrobe,), MyOutfits(controller: controllerMyOutfits,), Explore(controller: controllerExplore,), Profile(controller: controllerProfile,)];
+    animControllers = [controllerWardrobe, controllerMyOutfits, controllerExplore,controllerWishlist, controllerProfile];
+    screens = [Wardrobe(controller: controllerWardrobe,), MyOutfits(controller: controllerMyOutfits,), Explore(controller: controllerExplore,), Wishlist(controller: controllerWishlist,) ,Profile(controller: controllerProfile,)];
     super.initState();
   }
 
@@ -135,6 +142,12 @@ class BaseRouteState extends State<BaseRoute> with TickerProviderStateMixin{
       PersistentBottomNavBarItem(
         icon: const Icon(Icons.explore),
         title: ("Explore"),
+        activeColorPrimary: const Color(0xFFFDCDA2),
+        inactiveColorPrimary: const Color(0xFF425C5A),
+      ),
+      PersistentBottomNavBarItem(
+        icon: const Icon(Icons.bookmarks),
+        title: ("Wishlist"),
         activeColorPrimary: const Color(0xFFFDCDA2),
         inactiveColorPrimary: const Color(0xFF425C5A),
       ),
@@ -162,6 +175,7 @@ class BaseRouteState extends State<BaseRoute> with TickerProviderStateMixin{
         lastNavIndex = index;
         log(clothing.toString());
         //TODO: implementa return to top
+        //TODO: implementa pop schermi quando passi ad un altra sezione
       },
       confineInSafeArea: true,
       handleAndroidBackButtonPress: true,

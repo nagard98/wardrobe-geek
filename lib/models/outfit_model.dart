@@ -4,10 +4,17 @@ import 'package:esempio/models/article_model.dart';
 enum DressCode {casual, formalCasual, informale, streetwear, businessCasual, altro}*/
 
 List<String> seasonNames = ['Estate', 'Inverno', 'Primavera', 'Autunno'];
-Map<int,String>  seasons = seasonNames.asMap();
+Map<int, String> seasons = seasonNames.asMap();
 
-List<String> dressCodeNames = ['Casual', 'Formal Casual', 'Informale', 'Streetwear', 'Business Casual', 'Altro'];
-Map<int,String> dressCodes = dressCodeNames.asMap();
+List<String> dressCodeNames = [
+  'Casual',
+  'Formal Casual',
+  'Informale',
+  'Streetwear',
+  'Business Casual',
+  'Altro'
+];
+Map<int, String> dressCodes = dressCodeNames.asMap();
 
 class OutfitModel {
   int? id;
@@ -18,6 +25,7 @@ class OutfitModel {
   int? likes = 0;
   String? imgPath;
   DateTime? addedOn;
+  bool? isWishlisted = false;
   bool? favorite = false;
 
   OutfitModel(
@@ -27,6 +35,7 @@ class OutfitModel {
       this.dressCode,
       this.idUser,
       this.addedOn,
+      this.isWishlisted,
       this.favorite,
       this.likes,
       this.imgPath});

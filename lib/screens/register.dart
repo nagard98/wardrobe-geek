@@ -44,24 +44,24 @@ class RegisterState extends State<Register> {
   _save(BuildContext context) async {
     _formKey.currentState!.save();
 
-    bool isRegistered = await personalProfile.register(ProfileDBWorker.profileDBWorker);
+    bool isRegistered =
+        await personalProfile.register(ProfileDBWorker.profileDBWorker);
 
-    if(isRegistered){
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text("Profilo registrato con successo")));
+    if (isRegistered) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Profilo registrato con successo")));
       Navigator.of(context).pop();
-    }else{
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text("Errore nella registrazione del profilo")));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text("Errore nella registrazione del profilo")));
     }
-
   }
-
 
   @override
   Widget build(BuildContext context) {
     return BackdropScaffold(
       appBar: AppBar(
+        foregroundColor: const Color(0xFFFDCDA2),
         elevation: 0,
         title: const Text("Registrazione"),
         leading: null,
@@ -71,9 +71,10 @@ class RegisterState extends State<Register> {
       frontLayer: Form(
         key: _formKey,
         child: Container(
-          padding: const EdgeInsets.fromLTRB(16.0, 128.0, 16.0, 16.0),
+          margin: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 16.0),
           child: ListView(
             children: [
+              const SizedBox(height: 120,),
               TextFormField(
                 textCapitalization: TextCapitalization.none,
                 autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -85,16 +86,17 @@ class RegisterState extends State<Register> {
                   String? validation = validator.EmailValidator(
                           errorText: "L'Email inserita non è valida")
                       .call(input);
-                  isEmailValid = validation==null;
+                  isEmailValid = validation == null;
                   return validation;
                 },
-                onChanged: (input){
-                  setState(() {
-
-                  });
+                onChanged: (input) {
+                  setState(() {});
                 },
                 decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.check, color: isEmailValid ? Colors.lightGreen : Colors.grey,),
+                  prefixIcon: Icon(
+                    Icons.check,
+                    color: isEmailValid ? Colors.lightGreen : Colors.grey,
+                  ),
                   labelText: 'E-Mail',
                   labelStyle: const TextStyle(color: Color(0xFF425C5A)),
                   enabledBorder: const OutlineInputBorder(
@@ -119,21 +121,24 @@ class RegisterState extends State<Register> {
                 onSaved: (input) {
                   personalProfile.myProfile.password = input!;
                 },
-                validator: (input){
+                validator: (input) {
                   String? validation = passwordValidator.call(input);
                   isPassValid = (validation == null);
                   return validation;
                 },
-                onChanged: (input){
-                  setState(() {
-
-                  });
+                onChanged: (input) {
+                  setState(() {});
                 },
                 cursorColor: const Color(0xFFA4626D),
                 decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.check, color: isPassValid ? Colors.lightGreen : Colors.grey,),
+                  prefixIcon: Icon(
+                    Icons.check,
+                    color: isPassValid ? Colors.lightGreen : Colors.grey,
+                  ),
                   suffixIcon: IconButton(
-                    icon: isPassVisible ? const Icon(Icons.visibility_off) : const Icon(Icons.visibility),
+                    icon: isPassVisible
+                        ? const Icon(Icons.visibility_off)
+                        : const Icon(Icons.visibility),
                     onPressed: () {
                       setState(() {
                         isPassVisible = !isPassVisible;
@@ -154,7 +159,9 @@ class RegisterState extends State<Register> {
                           BorderSide(color: Color(0xFFFDCDA2), width: 2.0)),
                 ),
               ),
-              const SizedBox(height: 20,),
+              const SizedBox(
+                height: 20,
+              ),
               TextFormField(
                 textCapitalization: TextCapitalization.words,
                 autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -163,16 +170,21 @@ class RegisterState extends State<Register> {
                 },
                 cursorColor: const Color(0xFFA4626D),
                 validator: (input) {
-                  String? validation = validator.RequiredValidator(errorText: "Questo campo è obbligatorio").call(input);
+                  String? validation = validator.RequiredValidator(
+                          errorText: "Questo campo è obbligatorio")
+                      .call(input);
                   return validation;
                 },
-                onChanged: (input){
+                onChanged: (input) {
                   setState(() {
                     isNameValid = input.isNotEmpty;
                   });
                 },
                 decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.check, color: isNameValid ? Colors.lightGreen : Colors.grey,),
+                  prefixIcon: Icon(
+                    Icons.check,
+                    color: isNameValid ? Colors.lightGreen : Colors.grey,
+                  ),
                   labelText: 'Nome',
                   labelStyle: const TextStyle(color: Color(0xFF425C5A)),
                   enabledBorder: const OutlineInputBorder(
@@ -184,10 +196,12 @@ class RegisterState extends State<Register> {
                       borderSide: BorderSide(color: Colors.red, width: 1.0)),
                   focusedBorder: const OutlineInputBorder(
                       borderSide:
-                      BorderSide(color: Color(0xFFFDCDA2), width: 2.0)),
+                          BorderSide(color: Color(0xFFFDCDA2), width: 2.0)),
                 ),
               ),
-              const SizedBox(height: 20,),
+              const SizedBox(
+                height: 20,
+              ),
               TextFormField(
                 textCapitalization: TextCapitalization.words,
                 autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -196,16 +210,21 @@ class RegisterState extends State<Register> {
                 },
                 cursorColor: const Color(0xFFA4626D),
                 validator: (input) {
-                  String? validation = validator.RequiredValidator(errorText: "Questo campo è obbligatorio").call(input);
+                  String? validation = validator.RequiredValidator(
+                          errorText: "Questo campo è obbligatorio")
+                      .call(input);
                   return validation;
                 },
-                onChanged: (input){
+                onChanged: (input) {
                   setState(() {
                     isSurnameValid = input.isNotEmpty;
                   });
                 },
                 decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.check, color: isSurnameValid ? Colors.lightGreen : Colors.grey,),
+                  prefixIcon: Icon(
+                    Icons.check,
+                    color: isSurnameValid ? Colors.lightGreen : Colors.grey,
+                  ),
                   labelText: 'Cognome',
                   labelStyle: const TextStyle(color: Color(0xFF425C5A)),
                   enabledBorder: const OutlineInputBorder(
@@ -217,13 +236,16 @@ class RegisterState extends State<Register> {
                       borderSide: BorderSide(color: Colors.red, width: 1.0)),
                   focusedBorder: const OutlineInputBorder(
                       borderSide:
-                      BorderSide(color: Color(0xFFFDCDA2), width: 2.0)),
+                          BorderSide(color: Color(0xFFFDCDA2), width: 2.0)),
                 ),
               ),
               const SizedBox(
                 height: 30,
               ),
               ElevatedButton(
+                style: ButtonStyle(
+                    backgroundColor:
+                        MaterialStateProperty.all(const Color(0xFFA4626D))),
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
                     ScaffoldMessenger.of(context).showSnackBar(

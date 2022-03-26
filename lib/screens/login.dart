@@ -40,17 +40,17 @@ class LoginState extends State<Login> {
   _save(BuildContext context) async {
     _formKey.currentState!.save();
 
-    bool isLoggedIn = await personalProfile.login(ProfileDBWorker.profileDBWorker);
+    bool isLoggedIn =
+        await personalProfile.login(ProfileDBWorker.profileDBWorker);
 
-    if(isLoggedIn){
+    if (isLoggedIn) {
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text("Accesso effettuato")));
       Navigator.of(context).pop();
-    }else{
+    } else {
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text("Errore nell'accesso")));
     }
-
   }
 
   @override
@@ -59,6 +59,7 @@ class LoginState extends State<Login> {
       appBar: AppBar(
         elevation: 0,
         title: Text("Login"),
+        foregroundColor: const Color(0xFFFDCDA2),
         leading: null,
         actions: [],
       ),
@@ -66,8 +67,9 @@ class LoginState extends State<Login> {
       frontLayer: Form(
         key: _formKey,
         child: ListView(
-          padding: EdgeInsets.fromLTRB(16, 128, 16, 0),
+          padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
           children: [
+            const SizedBox(height: 120.0,),
             TextFormField(
               textCapitalization: TextCapitalization.none,
               autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -77,18 +79,19 @@ class LoginState extends State<Login> {
               cursorColor: const Color(0xFFA4626D),
               validator: (input) {
                 String? validation = validator.EmailValidator(
-                    errorText: "L'Email inserita non è valida")
+                        errorText: "L'Email inserita non è valida")
                     .call(input);
-                isEmailValid = validation==null;
+                isEmailValid = validation == null;
                 return validation;
               },
-              onChanged: (input){
-                setState(() {
-
-                });
+              onChanged: (input) {
+                setState(() {});
               },
               decoration: InputDecoration(
-                prefixIcon: Icon(Icons.check, color: isEmailValid ? Colors.lightGreen : Colors.grey,),
+                prefixIcon: Icon(
+                  Icons.check,
+                  color: isEmailValid ? Colors.lightGreen : Colors.grey,
+                ),
                 labelText: 'E-Mail',
                 labelStyle: const TextStyle(color: Color(0xFF425C5A)),
                 enabledBorder: const OutlineInputBorder(
@@ -100,7 +103,7 @@ class LoginState extends State<Login> {
                     borderSide: BorderSide(color: Colors.red, width: 1.0)),
                 focusedBorder: const OutlineInputBorder(
                     borderSide:
-                    BorderSide(color: Color(0xFFFDCDA2), width: 2.0)),
+                        BorderSide(color: Color(0xFFFDCDA2), width: 2.0)),
               ),
             ),
             const SizedBox(
@@ -113,21 +116,24 @@ class LoginState extends State<Login> {
               onSaved: (input) {
                 personalProfile.myProfile.password = input!;
               },
-              validator: (input){
+              validator: (input) {
                 String? validation = passwordValidator.call(input);
                 isPassValid = (validation == null);
                 return validation;
               },
-              onChanged: (input){
-                setState(() {
-
-                });
+              onChanged: (input) {
+                setState(() {});
               },
               cursorColor: const Color(0xFFA4626D),
               decoration: InputDecoration(
-                prefixIcon: Icon(Icons.check, color: isPassValid ? Colors.lightGreen : Colors.grey,),
+                prefixIcon: Icon(
+                  Icons.check,
+                  color: isPassValid ? Colors.lightGreen : Colors.grey,
+                ),
                 suffixIcon: IconButton(
-                  icon: isPassVisible ? const Icon(Icons.visibility_off) : const Icon(Icons.visibility),
+                  icon: isPassVisible
+                      ? const Icon(Icons.visibility_off)
+                      : const Icon(Icons.visibility),
                   onPressed: () {
                     setState(() {
                       isPassVisible = !isPassVisible;
@@ -145,13 +151,16 @@ class LoginState extends State<Login> {
                     borderSide: BorderSide(color: Colors.red, width: 1.0)),
                 focusedBorder: const OutlineInputBorder(
                     borderSide:
-                    BorderSide(color: Color(0xFFFDCDA2), width: 2.0)),
+                        BorderSide(color: Color(0xFFFDCDA2), width: 2.0)),
               ),
             ),
             SizedBox(
               height: 30,
             ),
             ElevatedButton(
+              style: ButtonStyle(
+                  backgroundColor:
+                      MaterialStateProperty.all(const Color(0xFFA4626D))),
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -162,18 +171,22 @@ class LoginState extends State<Login> {
               },
               child: Text("Login"),
             ),
-            SizedBox(height: 20,),
+            SizedBox(
+              height: 20,
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text("Non hai un account? "),
-                TextButton(onPressed: (){
-                  pushNewScreen(
-                    context,
-                    screen: Register(),
-                    withNavBar: true
-                  );
-                }, child: Text("Registrati"))
+                TextButton(
+                    style: ButtonStyle(
+                        foregroundColor:
+                            MaterialStateProperty.all(const Color(0xFFA4626D))),
+                    onPressed: () {
+                      pushNewScreen(context,
+                          screen: Register(), withNavBar: true);
+                    },
+                    child: Text("Registrati"))
               ],
             )
           ],
