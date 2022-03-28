@@ -60,7 +60,7 @@ class MyOutfitsModel extends ChangeNotifier implements OutfitsInterface{
   }
 
   @override
-  List<OutfitModel> getListOutfits(Section section) {
+  List<OutfitModel> getList(Section section) {
     //TODO: gestisci meglio l'argomento passato section per myoutfits
     return outfits!;
   }

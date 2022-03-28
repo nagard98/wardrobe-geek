@@ -19,6 +19,7 @@ import 'package:form_field_validator/form_field_validator.dart' as validator;
 import 'package:esempio/models/your_account_model.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
+import 'package:esempio/screens/profile.dart';
 
 var uuid = const Uuid();
 
@@ -80,8 +81,10 @@ Widget buildCardShimmer() => Shimmer.fromColors(
     baseColor: const Color(0xFFE3E1E1),
     highlightColor: const Color(0xFFEFEFEF));
 
-class HorizontalMoreList extends StatelessWidget {
-  const HorizontalMoreList(
+
+
+class HorizontalOutfitList extends StatelessWidget {
+  const HorizontalOutfitList(
       {Key? key,
       this.title = 'Title',
       this.explore2,
@@ -127,6 +130,7 @@ class HorizontalMoreList extends StatelessWidget {
                     foregroundColor:
                         MaterialStateProperty.all(const Color(0xFFA4626D))),
                 onPressed: () {
+                  log("asd");
                   explore2?.showScreen(1, section);
                 },
                 child: Row(
@@ -157,7 +161,7 @@ class HorizontalMoreList extends StatelessWidget {
                     } else {
                       return InkWell(
                         child: Hero(
-                          tag: "outfithome$section$index",
+                          tag: "explorehome$section$index",
                           child: Card(
                             shape: cardShape,
                             child: Image.file(
@@ -174,7 +178,7 @@ class HorizontalMoreList extends StatelessWidget {
                               builder: (context) => Outfit(
                                 outfit: explore.exploreMap[section]
                                     ?.elementAt(index) as OutfitModel,
-                                heroTag: "outfithome$section$index",
+                                heroTag: "explorehome$section$index",
                                 section: section,
                               ),
                             ),
@@ -198,6 +202,122 @@ class HorizontalMoreList extends StatelessWidget {
   }
 }
 
+class HorizontalUserList extends StatelessWidget {
+  const HorizontalUserList(
+      {Key? key,
+        this.title = 'Title',
+        this.explore2,
+        required this.section,
+        this.itemHeight = 200,
+        this.cardShape = const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(4)))})
+      : super(key: key);
+
+  void _handleTap(BuildContext context, GlobalKey parentKey, ProfileModel profile) {
+    PersonalAccount userProfile = PersonalAccount();
+    userProfile.myProfile = profile;
+    userProfile.isLoggedIn = true;
+    Navigator.of(context).push(MorpheusPageRoute(
+      builder: (context) => Profile(profile: userProfile ),
+      parentKey: parentKey,
+    ));
+  }
+
+  final bool isLoading = false;
+  final double itemHeight;
+  final ShapeBorder cardShape;
+  final String title;
+  final ExploreModel? explore2;
+  final Section section;
+
+  @override
+  Widget build(BuildContext context) {
+    final _parentKey = GlobalKey();
+    return Padding(
+      padding: const EdgeInsets.only(left: 8.0),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(title),
+              TextButton(
+                style: ButtonStyle(
+                    overlayColor:
+                    MaterialStateProperty.all(const Color(0xFFFDCDA2)),
+                    foregroundColor:
+                    MaterialStateProperty.all(const Color(0xFFA4626D))),
+                onPressed: () {
+                  explore2?.showScreen(1, section);
+                },
+                child: Row(
+                  children: const [
+                    Text("Vedi Tutti"),
+                    Icon(Icons.arrow_forward_ios)
+                  ],
+                ),
+              ),
+            ],
+          ),
+          Consumer<ExploreModel>(
+            builder: (context, explore, child) {
+              return SizedBox(
+                height: itemHeight,
+                child: GridView.builder(
+                  scrollDirection: Axis.horizontal,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    childAspectRatio: 1.5,
+                    crossAxisCount: 1,
+                    //mainAxisSpacing: 8,
+                    //TODO: valutare errore scroll extent is negative con silver grid
+                    //mainAxisSpacing: 8,
+                  ),
+                  itemBuilder: (context, index) {
+                    if (explore.isLoading) {
+                      return buildCardShimmer();
+                    } else {
+                      ProfileModel profile = explore.exploreMap[section]?[index] as ProfileModel;
+                      return InkWell(
+                        key: _parentKey,
+                        child: Hero(
+                          tag: "explorehome$section$index",
+                          child: Column(
+                            children: [
+                              CircleAvatar(
+                                radius: 48,
+                                backgroundColor: const Color(0xFF425C5A),
+                                backgroundImage: profile.pathPicture!.isEmpty ? Image.file(
+                                  //TODO: implement dynamic loading
+                                  File(profile.pathPicture!),
+                                  fit: BoxFit.cover,
+                                ).image : Image.asset('assets/profile_placeholder.png',fit: BoxFit.fitWidth,).image,
+                              ),
+                              Text(profile.name)
+                            ],
+                          ),
+                        ),
+                        onTap: () {
+                          _handleTap(context, _parentKey, profile);
+                        },
+                      );
+                    }
+                  },
+                  itemCount: explore.isLoading
+                      ? 4
+                      : (explore.exploreMap[section]?.length as int > 4
+                      ? 4
+                      : explore.exploreMap[section]?.length),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
 class FullScreenImage extends StatelessWidget {
   const FullScreenImage({
     Key? key,
@@ -205,7 +325,7 @@ class FullScreenImage extends StatelessWidget {
     required this.tag,
   }) : super(key: key);
 
-  final File image;
+  final Image image;
   final String tag;
 
   @override
@@ -218,7 +338,7 @@ class FullScreenImage extends StatelessWidget {
               Center(
                   child: Hero(
                 tag: tag,
-                child: Image.file(image),
+                child: image,
               )),
               Material(
                 child: InkWell(
@@ -447,7 +567,7 @@ class OutfitCard extends StatelessWidget {
     Navigator.of(context).push(MorpheusPageRoute(
       //TODO: Modifica Outfit
       builder: (context) => Outfit(
-        outfit: outfitsInterface.getListOutfits(section).elementAt(index),
+        outfit: outfitsInterface.getList(section).elementAt(index),
         heroTag: heroTag,
         section: section,
         isEditable: isEditable,
@@ -474,7 +594,7 @@ class OutfitCard extends StatelessWidget {
                 /*{outfitsInterface.getListOutfits(section).elementAt(index).id*/
                 child: Image.file(
                   File(outfitsInterface
-                      .getListOutfits(section)
+                      .getList(section)
                       .elementAt(index)
                       .imgPath as String),
                   fit: BoxFit.cover,
@@ -498,18 +618,18 @@ class OutfitCard extends StatelessWidget {
                             child: LikeButton(
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               isLiked: outfitsInterface
-                                  .getListOutfits(section)
+                                  .getList(section)
                                   .elementAt(index)
                                   .favorite,
                               onTap: (isLiked) async {
                                 outfitsInterface
-                                    .getListOutfits(section)
+                                    .getList(section)
                                     .elementAt(index)
                                     .favorite = !isLiked;
                                 outfitsInterface.updateOutfit(
                                     OutfitDBWorker.outfitDBWorker,
                                     outfitsInterface
-                                        .getListOutfits(section)
+                                        .getList(section)
                                         .elementAt(index),
                                     personalProfile.myProfile,
                                     withReload: false);
@@ -522,7 +642,7 @@ class OutfitCard extends StatelessWidget {
                             child: LikeButton(
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               isLiked: outfitsInterface
-                                  .getListOutfits(section)
+                                  .getList(section)
                                   .elementAt(index)
                                   .isWishlisted,
                               likeBuilder: (bool isLiked) {
@@ -565,7 +685,7 @@ class OutfitCard extends StatelessWidget {
                                       wishlistModel.removeOutfit(
                                           OutfitDBWorker.outfitDBWorker,
                                           outfitsInterface
-                                              .getListOutfits(section)
+                                              .getList(section)
                                               .elementAt(index)
                                               .id!,
                                           personalProfile.myProfile,
@@ -574,7 +694,7 @@ class OutfitCard extends StatelessWidget {
                                       wishlistModel.removeOutfit(
                                           OutfitDBWorker.outfitDBWorker,
                                           outfitsInterface
-                                              .getListOutfits(section)
+                                              .getList(section)
                                               .elementAt(index)
                                               .id!,
                                           personalProfile.myProfile,
@@ -589,7 +709,7 @@ class OutfitCard extends StatelessWidget {
                                     wishlistModel.addOutfit(
                                         OutfitDBWorker.outfitDBWorker,
                                         outfitsInterface
-                                            .getListOutfits(section)
+                                            .getList(section)
                                             .elementAt(index),
                                         personalProfile.myProfile,
                                         withReload: true);
@@ -597,7 +717,7 @@ class OutfitCard extends StatelessWidget {
                                     wishlistModel.addOutfit(
                                         OutfitDBWorker.outfitDBWorker,
                                         outfitsInterface
-                                            .getListOutfits(section)
+                                            .getList(section)
                                             .elementAt(index),
                                         personalProfile.myProfile);
                                   }
@@ -667,7 +787,7 @@ class OutfitCard extends StatelessWidget {
                                                     OutfitDBWorker
                                                         .outfitDBWorker,
                                                     outfitsInterface
-                                                        .getListOutfits(section)
+                                                        .getList(section)
                                                         .elementAt(index)
                                                         .id as int,
                                                     personalProfile.myProfile);
@@ -687,7 +807,7 @@ class OutfitCard extends StatelessWidget {
                                                       builder: (context) {
                                                 return NuovoOutfit(
                                                   outfitToEdit: outfitsInterface
-                                                      .getListOutfits(
+                                                      .getList(
                                                           Section.myoutfits)
                                                       .elementAt(index),
                                                 );
@@ -756,7 +876,7 @@ class OutfitCard extends StatelessWidget {
                                                       OutfitDBWorker
                                                           .outfitDBWorker,
                                                       outfitsInterface
-                                                          .getListOutfits(
+                                                          .getList(
                                                               section)
                                                           .elementAt(index)
                                                           .id!,
@@ -767,7 +887,7 @@ class OutfitCard extends StatelessWidget {
                                                       OutfitDBWorker
                                                           .outfitDBWorker,
                                                       outfitsInterface
-                                                          .getListOutfits(
+                                                          .getList(
                                                               section)
                                                           .elementAt(index)
                                                           .id!,

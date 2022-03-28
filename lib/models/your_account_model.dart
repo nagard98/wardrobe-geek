@@ -7,11 +7,13 @@ import 'package:esempio/models/wardrobe_model.dart';
 import 'package:flutter/material.dart';
 import 'package:esempio/models/profile_model.dart';
 import 'package:crypto/crypto.dart';
+import 'package:esempio/common/utils.dart';
+import 'package:esempio/models/outfit_model.dart';
 
 class PersonalAccount extends ChangeNotifier {
   PersonalAccount():
     myProfile = ProfileModel(
-      id: 1,
+      id: 0,
       email: "profile@local.com",
       password: sha256.convert(utf8.encode("local")).toString(),
       level: 0,
@@ -22,6 +24,8 @@ class PersonalAccount extends ChangeNotifier {
   ProfileModel myProfile;
   bool isLoggedIn = false;
   bool isRegistered = false;
+  List<OutfitModel> outfits=[];
+  List<ProfileModel> followed = [];
 
   login(ProfileDBWorker profileDBWorker) async{
     isLoggedIn = false;
@@ -34,6 +38,7 @@ class PersonalAccount extends ChangeNotifier {
       myProfile = foundProfile;
       wardrobeModel.loadArticles(ArticleDBWorker.articleDBWorker, myProfile);
       myOutfitsModel.loadOutfits(OutfitDBWorker.outfitDBWorker, myProfile);
+      outfits = await OutfitDBWorker.outfitDBWorker.getAll(myProfile.id!, order: Order.desPop);
       notifyListeners();
       return isLoggedIn;
     }
@@ -64,6 +69,14 @@ class PersonalAccount extends ChangeNotifier {
       return isRegistered = false;
     }
   }
+
+  loadData() async{
+    outfits = await OutfitDBWorker.outfitDBWorker.getAll(myProfile.id!, order: Order.desPop);
+    //TODO: implementa recupero utenti seguiti
+    followed = await ProfileDBWorker.profileDBWorker.getAll();
+    notifyListeners();
+  }
+
 }
 
 PersonalAccount personalProfile = PersonalAccount();

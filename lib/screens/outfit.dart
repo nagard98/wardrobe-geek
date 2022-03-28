@@ -140,7 +140,7 @@ class Outfit extends StatelessWidget {
                                   context,
                                   screen: MaterialPageRoute(builder: (_) {
                                     return utils.FullScreenImage(
-                                        image: File(outfit.imgPath.toString()),
+                                        image: Image.file(File(outfit.imgPath.toString())),
                                         tag: heroTag);
                                   }),
                                   withNavBar: false,

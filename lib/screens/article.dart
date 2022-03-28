@@ -759,7 +759,7 @@ class Articolo extends StatelessWidget {
                               context,
                               screen: MaterialPageRoute(builder: (_) {
                                 return FullScreenImage(
-                                    image: imageFile,
+                                    image: Image.file(imageFile),
                                     tag: "articolo${article.id}");
                               }),
                               withNavBar: false,

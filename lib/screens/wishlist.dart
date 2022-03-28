@@ -291,7 +291,7 @@ class WishlistFrontLayerState extends State<WishlistFrontLayer> {
                     ),
                 ),
                 const BackdropSubHeader(
-                  title: Text("I Miei Outfit"),
+                  title: Text("La mia Wishlist"),
                 ),
               ],
             );

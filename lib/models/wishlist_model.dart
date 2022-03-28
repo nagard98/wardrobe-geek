@@ -1,4 +1,5 @@
 import 'package:esempio/db/outfit_db_worker.dart';
+import 'package:esempio/db/profile_db_worker.dart';
 import 'package:esempio/models/article_model.dart';
 import 'package:esempio/models/explore_model.dart';
 import 'package:esempio/models/myoutfits_model.dart';
@@ -29,7 +30,7 @@ class WishlistModel extends ChangeNotifier implements OutfitsInterface{
     await outfitDBWorker.create(outfitModel, profile.id!, isWishlist: true);
     //await outfitDBWorker.update(outfitModel, personalProfile.myProfile.id!, isWishNum: 1);
     loadOutfits(outfitDBWorker, profile);
-    exploreModel.loadData(outfitDBWorker, profile,withReload: withReload);
+    exploreModel.loadData(outfitDBWorker, ProfileDBWorker.profileDBWorker, profile,withReload: withReload);
   }
 
   @override
@@ -37,7 +38,7 @@ class WishlistModel extends ChangeNotifier implements OutfitsInterface{
     await outfitDBWorker.delete(idOutfit, isWishlist: true, idUser: profile.id!);
     //await outfitDBWorker.update(outfitModel, personalProfile.myProfile.id!, isWishNum: -1);
     loadOutfits(outfitDBWorker, profile);
-    exploreModel.loadData(outfitDBWorker, profile, withReload: withReload);
+    exploreModel.loadData(outfitDBWorker, ProfileDBWorker.profileDBWorker, profile, withReload: withReload);
   }
 
   @override
@@ -50,7 +51,7 @@ class WishlistModel extends ChangeNotifier implements OutfitsInterface{
   }
 
   @override
-  List<OutfitModel> getListOutfits(Section section) {
+  List<OutfitModel> getList(Section section) {
     return wishlistOutfits;
   }
 

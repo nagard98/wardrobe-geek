@@ -1,7 +1,9 @@
 import 'package:esempio/db/outfit_db_worker.dart';
 import 'package:flutter/widgets.dart';
+import 'package:esempio/models/outfit_model.dart';
+import 'package:esempio/common/utils.dart';
 
-class ProfileModel {
+class ProfileModel{
   //String username;
   String email;
   String password;

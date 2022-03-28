@@ -79,20 +79,6 @@ class ProfileDBWorker {
     return _db;
   }
 
-  ArticleModel articleFromMap(Map<String,dynamic> ?map) {
-    ArticleModel article = ArticleModel(
-        id: map!['idArticle'] as int,
-        idUser: map['idUser'] as int,
-        articleName: map['articleName'] ?? '',
-        imgPath: map['artImg'] ?? "",
-        primaryColor: Color(map['primColor'] as int),
-        secondaryColor: Color(map['secColor'] as int),
-        brand: map['brand'] as int,
-        clothingType: map['clothingType'] as int ,
-        favorite: map['fav'] == 0 ? false : true);
-    return article;
-  }
-
   Map<String,dynamic> profileToMap(ProfileModel profile){
     Map<String,dynamic> map = <String,dynamic>{};
     map['id'] = profile.id;
@@ -122,59 +108,6 @@ class ProfileDBWorker {
         pathPicture: map['pathPicture'] ?? "default" ,
         level: map['level']);
     return profile;
-  }
-
-  Map<String, dynamic> outfitToMap(OutfitModel outfit, int idUser) {
-    Map<String, dynamic> map = <String, dynamic>{};
-    map['idOutfit'] = outfit.id;
-    map['idUser'] = idUser;
-    map['imgPath'] = outfit.imgPath;
-    map['dressCode'] = outfit.dressCode;
-    map['addedOn'] = (outfit.addedOn?.millisecondsSinceEpoch)!/1000;
-    map['favorite'] = outfit.favorite == true ? 1 : 0;
-    map['likes'] = outfit.likes;
-    map['season'] = outfit.season;
-
-    return map;
-  }
-
-
-  String _buildCondition(Filter filter, List filterArgs, BooleanOp operator){
-    List conditions = [];
-    for (var element in filterArgs) {
-      switch (filter){
-        case Filter.clothingType:
-          conditions.add("clothingType='$element'");
-          break;
-        case Filter.brand:
-          conditions.add("brand='$element'");
-          break;
-        case Filter.primColor:
-          conditions.add("primColor='$element'");
-          break;
-        case Filter.secColor:
-          conditions.add("secColor='$element'");
-          break;
-        case Filter.fav:
-          conditions.add("fav='$element'");
-          break;
-        case Filter.season:
-          conditions.add("season='$element'");
-          break;
-        case Filter.like:
-          conditions.add("like='$element'");
-          break;
-        case Filter.dressCode:
-          conditions.add("dressCode='$element'");
-          break;
-        case Filter.favorite:
-          conditions.add("favorite='$element'");
-          break;
-      }
-    }
-    log(conditions.toString());
-    String op = operator==BooleanOp.and ? " AND " : " OR ";
-    return conditions.isEmpty ? "" : '(${conditions.join(op)})';
   }
 
   create(ProfileModel profile) async {
@@ -218,42 +151,16 @@ class ProfileDBWorker {
       return profile;
     }
   }
-/*
-  Future<List<dynamic>?> getAll(int idUser, {Map<Filter,List> filters=const {} }) async {
+
+  Future<List<ProfileModel>> getAll() async{
     Database? db = await _getDB();
+
     List<Map<String, Object?>>? recs;
-    String userIdCondition = idUser == -1 ? "" : "outfits.idUser='$idUser'" ;
+    recs = await _db?.query('profiles');
 
-    if (filters.isEmpty) {
-      recs = await _db?.rawQuery('SELECT outfits.idOutfit,outfits.idUser,articles.idArticle,outfits.imgPath as otfImg,season,likes,addedOn,favorite,dressCode,articles.imgPath as artImg,primColor,secColor,brand,clothingType,fav '
-          'FROM outfits,outfit_articles,articles '
-          'WHERE $userIdCondition ${userIdCondition.isEmpty ? "" : "AND"} outfits.idOutfit=outfit_articles.idOutfit AND articles.idArticle=outfit_articles.idArticle');
-    }else{
-      Map<Filter,String> stringedFilters = filters.map((key, value) => MapEntry(key,_buildCondition(key, value, BooleanOp.or)) );
-      log(stringedFilters.toString());
-      List cleanedFilters = stringedFilters.values.toList();
-
-      log("Before: $cleanedFilters");
-      cleanedFilters.removeWhere((element) => element=="");
-      cleanedFilters.add(userIdCondition);
-      log("After: $cleanedFilters");
-
-      recs = await _db?.rawQuery('SELECT outfits.idOutfit,outfits.idUser,articles.idArticle,outfits.imgPath as otfImg,season,likes,addedOn,favorite,dressCode,articles.imgPath as artImg,primColor,secColor,brand,clothingType,fav '
-          'FROM outfits,outfit_articles,articles '
-          'WHERE ${cleanedFilters.join(" AND ")} ${userIdCondition.isEmpty ? "" : "AND"} outfits.idOutfit=outfit_articles.idOutfit AND articles.idArticle=outfit_articles.idArticle');
-    }
-
-    Map<String,dynamic> map = {};
-    recs?.forEach((element) {
-      log(element.toString());
-      map.putIfAbsent(element['idOutfit'].toString(), () => []);
-      (map[element['idOutfit'].toString()] as List).add(element);
-    });
-    List<OutfitModel> list = [];
-    map.forEach( (key, value) => list.add(outfitFromMap(key, value)) );
-    log(list.toString());
+    List<ProfileModel> list = recs == null ? [] : recs.map((m) => profileFromMap(m)).toList();
     return list;
-  }*/
+  }
 
   update(ProfileModel profile) async {
     Database? db = await _getDB();

@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:esempio/db/profile_db_worker.dart';
 import 'package:esempio/db/outfit_db_worker.dart';
 import 'package:esempio/models/outfit_model.dart';
 import 'package:esempio/models/outfits_interface.dart';
@@ -10,7 +11,7 @@ import 'package:esempio/models/article_model.dart';
 import 'package:flutter/material.dart';
 import 'package:esempio/common/utils.dart';
 
-enum Section {recOutf, popOutf, newHotOutf, popUsers, filteredOutf, filteredUsers, home, myoutfits, wishlist }
+enum Section {recOutf, popOutf, newHotOutf, recUsers, popUsers, newHotUsers, filteredOutf, filteredUsers, home, myoutfits, wishlist }
 
 class ExploreModel extends ChangeNotifier implements OutfitsInterface {
   Map<Section,List> exploreMap = {};
@@ -19,7 +20,8 @@ class ExploreModel extends ChangeNotifier implements OutfitsInterface {
   bool isLoading = false;
   bool isEditing = false;
   Section currentSection = Section.home;
-  int currentIndex=0;
+  int currentOutfitStackIndex=0;
+  int currentUserStackIndex=0;
   ScrollController homeScrollController = ScrollController();
   ScrollController newPageScrollController = ScrollController();
 
@@ -29,9 +31,15 @@ class ExploreModel extends ChangeNotifier implements OutfitsInterface {
     });
   }
 
-  void showScreen(int index, Section currentSection){
-    this.currentSection = currentSection;
-    currentIndex = index;
+  void showScreen(int index, Section targetSection){
+    currentSection = targetSection;
+    currentUserStackIndex = 0;
+    currentOutfitStackIndex = 0;
+    if([Section.filteredOutf, Section.recOutf, Section.popOutf, Section.newHotOutf].any((element) => element==targetSection)){
+      currentOutfitStackIndex = index;
+    }else{
+      currentUserStackIndex = index;
+    }
     notifyListeners();
   }
 
@@ -59,16 +67,16 @@ class ExploreModel extends ChangeNotifier implements OutfitsInterface {
   void updateOutfit(OutfitDBWorker outfitDBWorker, OutfitModel outfitModel, ProfileModel profile,
       {bool withReload = true}) async{
     await outfitDBWorker.update(outfitModel, profile.id!);
-    if(withReload) loadData(outfitDBWorker, profile);
+    if(withReload) loadData(outfitDBWorker, ProfileDBWorker.profileDBWorker , profile);
   }
 
-  void loadData(OutfitDBWorker outfitDBWorker, ProfileModel profile, {bool withReload = true}) async {
+  void loadData(OutfitDBWorker outfitDBWorker, ProfileDBWorker profileDBWorker, ProfileModel profile, {bool withReload = true}) async {
     isLoading = true;
     await Future.delayed(const Duration(milliseconds: 500), () {});
-    exploreMap[Section.recOutf] = (await outfitDBWorker.getAll(-1,idOwner: personalProfile.myProfile.id!));
-    exploreMap[Section.newHotOutf] = (await outfitDBWorker.getAll(-1,idOwner: personalProfile.myProfile.id!));
-    exploreMap[Section.popOutf] = (await outfitDBWorker.getAll(-1,idOwner: personalProfile.myProfile.id!));
-    exploreMap[Section.popUsers] = (await outfitDBWorker.getAll(-1,idOwner: personalProfile.myProfile.id!));
+    exploreMap[Section.recOutf] = (await outfitDBWorker.getAll(-1, idOwner: personalProfile.myProfile.id!));
+    exploreMap[Section.newHotOutf] = (await outfitDBWorker.getAll(-1,order: Order.desDate , idOwner: personalProfile.myProfile.id!));
+    exploreMap[Section.popOutf] = (await outfitDBWorker.getAll(-1, idOwner: personalProfile.myProfile.id!));
+    exploreMap[Section.popUsers] = (await profileDBWorker.getAll());
     isLoading = false;
     log(isLoading.toString());
     if(withReload) notifyListeners();
@@ -85,7 +93,7 @@ class ExploreModel extends ChangeNotifier implements OutfitsInterface {
   }
 
   @override
-  List<OutfitModel> getListOutfits(Section section) {
+  List<OutfitModel> getList(Section section) {
     return exploreMap[section]!.cast<OutfitModel>();
   }
 

@@ -14,5 +14,5 @@ abstract class OutfitsInterface {
 
   void loadOutfits(OutfitDBWorker outfitDBWorker, ProfileModel profile);
 
-  List<OutfitModel> getListOutfits(Section section);
+  List<OutfitModel> getList(Section section);
 }
